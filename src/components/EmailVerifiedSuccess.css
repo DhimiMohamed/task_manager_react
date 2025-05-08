@@ -1,0 +1,108 @@
+/* src/components/EmailVerifiedSuccess.css */
+.verification-success-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f8fafc;
+    padding: 20px;
+  }
+  
+  .verification-success-card {
+    max-width: 450px;
+    width: 100%;
+    padding: 2.5rem;
+    text-align: center;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    animation: fadeInUp 0.5s ease-out;
+  }
+  
+  .success-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1.5rem;
+    background-color: #48bb78;
+    color: white;
+    font-size: 2rem;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .verification-success-card h1 {
+    margin: 0 0 1rem;
+    color: #2d3748;
+    font-size: 1.5rem;
+  }
+  
+  .verification-success-card p {
+    color: #4a5568;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+  }
+  
+  .progress-bar {
+    height: 6px;
+    background-color: #e2e8f0;
+    border-radius: 3px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    width: 100%;
+    background-color: #48bb78;
+    animation: progressShrink 5s linear forwards;
+  }
+  
+  .login-now-button {
+    padding: 0.8rem 1.5rem;
+    background-color: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .login-now-button:hover {
+    background-color: #3182ce;
+    transform: translateY(-1px);
+  }
+  
+  /* Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes progressShrink {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
+  
+  /* Mobile Responsiveness */
+  @media (max-width: 480px) {
+    .verification-success-card {
+      padding: 1.8rem;
+    }
+    
+    .success-icon {
+      width: 50px;
+      height: 50px;
+      font-size: 1.7rem;
+    }
+  }

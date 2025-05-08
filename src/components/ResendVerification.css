@@ -1,0 +1,193 @@
+/* Container Styles */
+.resend-verification-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  .resend-verification-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 1.8rem;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #edf2f7;
+  }
+  
+  /* Header Styles */
+  .resend-title {
+    margin: 0 0 1.8rem;
+    color: #2d3748;
+    font-size: 1.3rem;
+    text-align: center;
+    font-weight: 600;
+  }
+  
+  /* Form Styles */
+  .resend-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  
+  .input-group {
+    width: 100%;
+    position: relative;
+  }
+  
+  .email-input {
+    width: 100%;
+    padding: 0.85rem 1.2rem;
+    font-size: 0.95rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.25s ease;
+    background-color: #f8fafc;
+  }
+  
+  .email-input:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    background-color: #fff;
+  }
+  
+  .email-input:disabled {
+    background-color: #edf2f7;
+    cursor: not-allowed;
+  }
+  
+  /* Button Styles */
+  .resend-button {
+    width: 100%;
+    padding: 0.85rem;
+    background-color: #4299e1;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .resend-button:hover:not(:disabled) {
+    background-color: #3182ce;
+    transform: translateY(-1px);
+  }
+  
+  .resend-button:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  
+  .resend-button:disabled {
+    cursor: not-allowed;
+  }
+  
+  .resend-button.loading {
+    background-color: #4299e1;
+  }
+  
+  .resend-button.cooldown {
+    background-color: #edf2f7;
+    color: #718096;
+    cursor: not-allowed;
+  }
+  
+  /* Progress Bar Animation */
+  .resend-button.cooldown::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: #4299e1;
+    animation: cooldown-progress 60s linear forwards;
+  }
+  
+  @keyframes cooldown-progress {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
+  
+  /* Spinner Animation */
+  .spinner {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Message Styles */
+  .message {
+    margin-top: 1.2rem;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    line-height: 1.4;
+  }
+  
+  .message.success {
+    background-color: #f0fff4;
+    color: #2f855a;
+    border: 1px solid #c6f6d5;
+  }
+  
+  .message.error {
+    background-color: #fff5f5;
+    color: #c53030;
+    border: 1px solid #fed7d7;
+  }
+  
+  /* Cooldown Message */
+  .cooldown-message {
+    margin-top: 0.8rem;
+    font-size: 0.85rem;
+    color: #718096;
+    text-align: center;
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  /* Animations */
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  /* Responsive Adjustments */
+  @media (max-width: 480px) {
+    .resend-verification-card {
+      padding: 1.4rem;
+      border-radius: 10px;
+    }
+    
+    .resend-title {
+      font-size: 1.2rem;
+    }
+    
+    .email-input {
+      padding: 0.75rem 1rem;
+    }
+    
+    .resend-button {
+      padding: 0.75rem;
+    }
+  }

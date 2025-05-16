@@ -1,40 +1,63 @@
-
-import './App.css'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RegistrationForm from './components/RegistrationForm';
-import VerifyEmailPage from './components/VerifyEmailPage'; // <-- ADD THIS
+import VerifyEmailPage from './components/VerifyEmailPage';
 import EmailVerifiedSuccess from './components/EmailVerifiedSuccess';
 import LoginForm from './components/LoginForm';
-import Test from './components/Test'; 
-import ProtectedRoute from './routes/ProtectedRoute'; 
-
+import Dashboard from './pages/Dashboard';
+import Tasks from './components/Test';
+import ProtectedRoute from './routes/ProtectedRoute';
+import Sidebar from './components/sidebar';
+import CalendarPage from './pages/CalendarPage';
+import NewTaskPage from './pages/NewTaskPage';
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Your existing routes */}
+        {/* Public routes */}
         <Route path="/register" element={<RegistrationForm />} />
-        
-        {/* NEW ROUTE - Add this line exactly as shown */}
-        <Route path="/verify-email" element={<VerifyEmailPage />} />
-
-        <Route path="/email-verified" element={<EmailVerifiedSuccess />} />
-
         <Route path="/login" element={<LoginForm />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/email-verified" element={<EmailVerifiedSuccess />} />
+        {/* ... other public routes */}
 
-        {/* ✅ Protect the /tasks route */}
-        <Route
-          path="/tasks"
-          element={
-            <ProtectedRoute>
-              <Test />
-            </ProtectedRoute>
-          }
-        />
+        {/* Protected area with wildcard */}
+        <Route path="/*" element={
+          <ProtectedRoute>
+            <LayoutWithSidebar />
+          </ProtectedRoute>
+        }>
+          {/* Nested protected routes */}
+          {/* <Route path="dashboard" element={<Dashboard />} /> */}
+          {/* <Route path="calendar" element={<CalendarPage />} /> */}
+          {/* <Route path="tasks" element={<Tasks />} /> */}
+          {/* <Route index element={<Dashboard />} />  */}
+          {/* Default route */}
+        </Route>
 
+        {/* 404 handling */}
+        <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>
   );
 }
-export default App
+
+function LayoutWithSidebar() {
+  return (
+    <div className="flex h-screen">
+      <Sidebar />
+      <main className="flex-1 overflow-auto p-2 md:p-6 pt-16 md:pt-6">
+        <Routes>
+          {/* These will render in the main content area */}
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="calendar" element={<CalendarPage />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="tasks/new" element={<NewTaskPage />} />
+        </Routes>
+      </main>
+    </div>
+  );
+}
+
+export default App;

@@ -11,6 +11,7 @@ import CalendarPage from './pages/CalendarPage';
 import NewTaskPage from './pages/NewTaskPage';
 import CategoriesPage from './pages/CategoriesPage';
 import TasksPage from './pages/TasksPage';
+import AIAssistantToggle from './components/ai-assistant-toggle';
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function LayoutWithSidebar() {
           <Route path="tasks/new" element={<NewTaskPage />} />
         </Routes>
       </main>
+      <AIAssistantToggle/>
     </div>
   );
 }

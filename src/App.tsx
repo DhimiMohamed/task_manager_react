@@ -4,11 +4,13 @@ import VerifyEmailPage from './components/VerifyEmailPage';
 import EmailVerifiedSuccess from './components/EmailVerifiedSuccess';
 import LoginForm from './components/LoginForm';
 import Dashboard from './pages/Dashboard';
-import Tasks from './components/Test';
+// import Tasks from './components/Test';
 import ProtectedRoute from './routes/ProtectedRoute';
 import Sidebar from './components/sidebar';
 import CalendarPage from './pages/CalendarPage';
 import NewTaskPage from './pages/NewTaskPage';
+import CategoriesPage from './pages/CategoriesPage';
+import TasksPage from './pages/TasksPage';
 
 function App() {
   return (
@@ -45,14 +47,18 @@ function App() {
 function LayoutWithSidebar() {
   return (
     <div className="flex h-screen">
+      
       <Sidebar />
       <main className="flex-1 overflow-auto p-2 md:p-6 pt-16 md:pt-6">
+      {/* <main className="flex-1 p-2 md:p-6 pt-16 md:pt-6"> */}
         <Routes>
           {/* These will render in the main content area */}
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="calendar" element={<CalendarPage />} />
-          <Route path="tasks" element={<Tasks />} />
+          <Route path="categories" element={<CategoriesPage />} />
+          {/* <Route path="tasks" element={<Tasks />} /> */}
+          <Route path="tasks" element={<TasksPage />} />
           <Route path="tasks/new" element={<NewTaskPage />} />
         </Routes>
       </main>

@@ -95,12 +95,12 @@ export default function CalendarPage() {
 
   return (
     <div className="flex flex-col lg:h-[calc(100vh-4rem)] h-auto">
-      <div className="flex-none p-4 sm:p-4 pb-0 sm:pb-0">
+      <div className="flex-none ">
         <h1 className="text-xl sm:text-2xl font-bold">Calendar</h1>
         <p className="text-sm sm:text-base text-muted-foreground">Manage your schedule and tasks</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row flex-1 gap-4 p-4 lg:overflow-hidden">
+      <div className="flex flex-col lg:flex-row flex-1 gap-4 pt-4 lg:overflow-hidden">
         <CalendarSidebar
           currentDate={currentDate}
           selectedDate={selectedDate}

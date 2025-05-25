@@ -20,6 +20,8 @@ models/index.ts
 models/profile.ts
 models/reminder.ts
 models/task.ts
+models/tasks-extract-task-details-create-request.ts
+models/tasks-extract-task-details-create200-response.ts
 models/token-refresh.ts
 models/user-login.ts
 models/user-registration.ts

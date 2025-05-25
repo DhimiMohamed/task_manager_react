@@ -8,6 +8,8 @@ export * from './category';
 export * from './profile';
 export * from './reminder';
 export * from './task';
+export * from './tasks-extract-task-details-create200-response';
+export * from './tasks-extract-task-details-create-request';
 export * from './token-refresh';
 export * from './user';
 export * from './user-login';

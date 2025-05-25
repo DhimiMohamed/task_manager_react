@@ -11,7 +11,7 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <AuthProvider>  {/* Wrap App with AuthProvider */}
       <QueryClientProvider client={queryClient}>
-      <App />
+        <App />
       </QueryClientProvider>
     </AuthProvider>
   </StrictMode>,

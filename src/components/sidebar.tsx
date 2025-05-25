@@ -12,6 +12,7 @@ import {
   Sparkles,
   Menu,
   X,
+  Tag,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -33,6 +34,12 @@ const routes = [
     icon: Calendar,
     href: "/calendar",
     color: "text-pink-700",
+  },
+  {
+    label: "Categories",
+    icon: Tag,
+    href: "/categories",
+    color: "text-green-600",
   },
   {
     label: "AI Suggestions",

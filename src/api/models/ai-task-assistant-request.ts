@@ -14,8 +14,17 @@
 
 
 
-export * from './apis/aiassistant-api';
-export * from './apis/accounts-api';
-export * from './apis/reminders-api';
-export * from './apis/tasks-api';
+/**
+ * 
+ * @export
+ * @interface AiTaskAssistantRequest
+ */
+export interface AiTaskAssistantRequest {
+    /**
+     * User\'s natural language prompt/request
+     * @type {string}
+     * @memberof AiTaskAssistantRequest
+     */
+    'prompt': string;
+}
 

@@ -14,8 +14,17 @@
 
 
 
-export * from './apis/aiassistant-api';
-export * from './apis/accounts-api';
-export * from './apis/reminders-api';
-export * from './apis/tasks-api';
+/**
+ * 
+ * @export
+ * @interface AiTaskAssistant500Response
+ */
+export interface AiTaskAssistant500Response {
+    /**
+     * Error details
+     * @type {string}
+     * @memberof AiTaskAssistant500Response
+     */
+    'error'?: string;
+}
 

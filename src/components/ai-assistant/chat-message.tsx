@@ -5,11 +5,13 @@ import { Bot, User, Volume2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-// Define the ChatMessageType interface directly in this file
 interface ChatMessageType {
+  id: string
   type: "user" | "assistant"
   content: string
   timestamp: Date
+  toolResults?: any[]
+  details?: string[]
 }
 
 interface ChatMessageProps {
@@ -23,7 +25,12 @@ export default function ChatMessage({ message, isMobile = false }: ChatMessagePr
   const handlePlayAudio = () => {
     // Text-to-speech functionality
     if ("speechSynthesis" in window) {
-      const utterance = new SpeechSynthesisUtterance(message.content)
+      const speechContent = [
+        message.content,
+        ...(message.details || []),
+      ].join(". ")
+
+      const utterance = new SpeechSynthesisUtterance(speechContent)
       utterance.rate = 0.9
       utterance.pitch = 1
       speechSynthesis.speak(utterance)
@@ -57,6 +64,17 @@ export default function ChatMessage({ message, isMobile = false }: ChatMessagePr
           )}
         >
           <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          
+          {/* Display details if they exist */}
+          {message.details && message.details.length > 0 && (
+            <div className="mt-2 text-muted-foreground">
+              <ul className="list-disc pl-4 space-y-1">
+                {message.details.map((detail, index) => (
+                  <li key={index}>{detail}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <div

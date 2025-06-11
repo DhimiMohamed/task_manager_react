@@ -2,6 +2,7 @@
 .npmignore
 api.ts
 apis/accounts-api.ts
+apis/aiassistant-api.ts
 apis/reminders-api.ts
 apis/tasks-api.ts
 base.ts
@@ -15,6 +16,13 @@ models/accounts-password-reset-request-create-request.ts
 models/accounts-password-reset-reset-password-create-request.ts
 models/accounts-password-reset-verify-otp-create-request.ts
 models/accounts-resend-verification-create-request.ts
+models/ai-task-assistant-request.ts
+models/ai-task-assistant200-response-response-tool-results-inner.ts
+models/ai-task-assistant200-response-response.ts
+models/ai-task-assistant200-response.ts
+models/ai-task-assistant400-response.ts
+models/ai-task-assistant401-response.ts
+models/ai-task-assistant500-response.ts
 models/category.ts
 models/index.ts
 models/profile.ts

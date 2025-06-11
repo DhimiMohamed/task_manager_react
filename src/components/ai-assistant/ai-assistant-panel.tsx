@@ -5,21 +5,25 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-// import { Separator } from "@/components/ui/separator"
 import { MessageCircle, Send, Bot, X, Minimize2, Maximize2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ChatMessage from "./chat-message"
 import VoiceInput from "./voice-input"
-import TaskSummaryCard from "./task-summary-card"
-import TaskVerificationModal from "./task-verification-modal"
-import { Task, TaskStatusEnum } from "@/api/models/task"
+// import TaskSummaryCard from "./task-summary-card"
+// import TaskVerificationModal from "./task-verification-modal"
+// import { Task, TaskStatusEnum } from "@/api/models/task"
+import { AIAssistantApi } from "@/api/apis/aiassistant-api"
+import { AiTaskAssistantRequest } from "@/api/models/ai-task-assistant-request"
+import { AiTaskAssistant200Response } from "@/api/models/ai-task-assistant200-response"
+import customAxios from "@/lib/customAxios"
 
 interface ChatMessageType {
   id: string
   type: "user" | "assistant"
   content: string
   timestamp: Date
-  taskSuggestion?: Task
+  toolResults?: any[]
+  details?: string[]
 }
 
 interface AIAssistantPanelProps {
@@ -43,8 +47,6 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
   const [inputValue, setInputValue] = useState("")
   const [isListening, setIsListening] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
-  const [pendingTask, setPendingTask] = useState<Task | null>(null)
-  const [showVerificationModal, setShowVerificationModal] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
@@ -86,125 +88,47 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
     setInputValue("")
     setIsProcessing(true)
 
-    setTimeout(() => {
-      const response = processUserInput(inputValue)
-      setMessages((prev) => [...prev, response.message])
-      if (response.taskSuggestion) setPendingTask(response.taskSuggestion)
+    try {
+      const aiAssistantApi = new AIAssistantApi(undefined, undefined, customAxios)
+      const request: AiTaskAssistantRequest = {
+        prompt: inputValue
+      }
+
+      const response = await aiAssistantApi.aiTaskAssistant(request)
+      handleApiResponse(response.data)
+    } catch (error) {
+      console.error("Error calling AI assistant API:", error)
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now().toString(),
+          type: "assistant",
+          content: "Sorry, I encountered an error processing your request. Please try again later.",
+          timestamp: new Date(),
+        }
+      ])
+    } finally {
       setIsProcessing(false)
-    }, 1000)
+    }
   }
 
-  const processUserInput = (input: string): { message: ChatMessageType; taskSuggestion?: Task } => {
-    const lowerInput = input.toLowerCase()
+  const handleApiResponse = (response: AiTaskAssistant200Response) => {
+    if (!response?.response) return
 
-    if (lowerInput.includes("meeting") || lowerInput.includes("schedule")) {
-      const taskSuggestion: Task = {
-        title: "Meeting",
-        description: "Scheduled meeting",
-        due_date: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
-        start_time: "14:00",
-        end_time: "15:00",
-        category: 1,
-        priority: 2,
-        status: TaskStatusEnum.Pending,
-        user: 1,
-      }
-      return {
-        message: {
-          id: Date.now().toString(),
-          type: "assistant",
-          content: "I've understood you want to schedule a meeting. Here's what I've prepared:",
-          timestamp: new Date(),
-          taskSuggestion,
-        },
-        taskSuggestion,
-      }
+    const assistantMessage: ChatMessageType = {
+      id: Date.now().toString(),
+      type: "assistant",
+      content: response.response.user_message || "Here's what I've done:",
+      timestamp: new Date(),
+      details: response.response.details,
+      toolResults: response.response.tool_results
     }
 
-    if (lowerInput.includes("remind") || lowerInput.includes("task")) {
-      const taskSuggestion: Task = {
-        title: "Reminder Task",
-        description: "Task created from reminder",
-        due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-        start_time: "09:00",
-        end_time: "10:00",
-        category: 2,
-        priority: 2,
-        status: TaskStatusEnum.Pending,
-        user: 1,
-      }
-      return {
-        message: {
-          id: Date.now().toString(),
-          type: "assistant",
-          content: "I'll help you create a reminder. Here's what I've set up:",
-          timestamp: new Date(),
-          taskSuggestion,
-        },
-        taskSuggestion,
-      }
-    }
-
-    return {
-      message: {
-        id: Date.now().toString(),
-        type: "assistant",
-        content:
-          "I understand you want to manage your tasks. Could you be more specific? For example, you can say 'Schedule a meeting tomorrow at 2 PM' or 'Remind me to call the dentist next week'.",
-        timestamp: new Date(),
-      },
-    }
+    setMessages((prev) => [...prev, assistantMessage])
   }
 
   const handleVoiceInput = (transcript: string) => {
     setInputValue(transcript)
-  }
-
-  const handleTaskAction = (action: string, task: Task) => {
-    switch (action) {
-      case "review":
-      case "modify":
-        setShowVerificationModal(true)
-        break
-      case "submit":
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            type: "assistant",
-            content: `Perfect! I've created the task "${task.title}" for you. You can find it in your task list.`,
-            timestamp: new Date(),
-          },
-        ])
-        setPendingTask(null)
-        break
-      case "cancel":
-        setMessages((prev) => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            type: "assistant",
-            content: "No problem! The task has been cancelled. Is there anything else I can help you with?",
-            timestamp: new Date(),
-          },
-        ])
-        setPendingTask(null)
-        break
-    }
-  }
-
-  const handleTaskSubmit = (task: Task) => {
-    setMessages((prev) => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        type: "assistant",
-        content: `Great! I've updated and created the task "${task.title}" for you.`,
-        timestamp: new Date(),
-      },
-    ])
-    setPendingTask(null)
-    setShowVerificationModal(false)
   }
 
   if (!isOpen) {
@@ -226,11 +150,11 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
     <>
       <Card
         className={cn(
-          "p-0", // 👈 THIS REMOVES THE UNWANTED py-6
+          "p-0",
           "fixed shadow-xl z-50 flex flex-col",
           isMobile && "inset-0 rounded-none",
           !isMobile && "bottom-4 right-4 w-96 h-[600px]",
-          isMinimized && !isMobile && "h-16 p-4",
+          isMinimized && !isMobile && "h-16 p-4 py-1",
           className,
         )}
       >
@@ -269,13 +193,15 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
                   {messages.map((message) => (
                     <div key={message.id}>
                       <ChatMessage message={message} isMobile={isMobile} />
-                      {message.taskSuggestion && (
-                        <div className="mt-2">
-                          <TaskSummaryCard
-                            task={message.taskSuggestion}
-                            onAction={(action) => handleTaskAction(action, message.taskSuggestion!)}
-                            isMobile={isMobile}
-                          />
+                      {message.details && message.details.length > 0 && (
+                        <div className="mt-2 pl-10">
+                          <div className="text-sm text-muted-foreground">
+                            <ul className="list-disc pl-4 space-y-1">
+                              {message.details.map((detail, index) => (
+                                <li key={index}>{detail}</li>
+                              ))}
+                            </ul>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -296,8 +222,6 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
                 </div>
               </ScrollArea>
             </div>
-
-            {/* <Separator className="mt-0" /> */}
 
             <div className={cn("border-t bg-background", isMobile ? "p-4 pb-safe-area-inset-bottom" : "p-4")}>
               <div className="flex items-center space-x-2">
@@ -330,16 +254,6 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
           </>
         )}
       </Card>
-
-      {showVerificationModal && pendingTask && (
-        <TaskVerificationModal
-          task={pendingTask}
-          isOpen={showVerificationModal}
-          onClose={() => setShowVerificationModal(false)}
-          onSubmit={handleTaskSubmit}
-          isMobile={isMobile}
-        />
-      )}
     </>
   )
 }

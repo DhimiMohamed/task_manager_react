@@ -21,3 +21,4 @@ export * from './token-refresh';
 export * from './user';
 export * from './user-login';
 export * from './user-registration';
+export * from './user-settings';

@@ -9,14 +9,31 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { format, subMinutes, subHours, subDays } from "date-fns";
+import { CalendarIcon, Plus, Trash2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import AITaskGenerator from "@/components/ai-task-generator";
 import { Task, TaskStatusEnum } from "@/api/models/task";
+import { Reminder, ReminderEmailStatusEnum, ReminderInAppStatusEnum } from "@/api/models/reminder";
 import { TasksApi } from "@/api/apis/tasks-api";
+import { RemindersApi } from "@/api/apis/reminders-api";
 import customAxios from "@/lib/customAxios";
 import { useCategories } from "@/hooks/useCategories";
+
+interface ReminderInput {
+  id: string;
+  type: 'preset' | 'custom';
+  preset?: string;
+  customDateTime?: Date;
+}
+
+const REMINDER_PRESETS = [
+  { value: '10min', label: '10 minutes before' },
+  { value: '30min', label: '30 minutes before' },
+  { value: '1hour', label: '1 hour before' },
+  { value: '2hours', label: '2 hours before' },
+  { value: '1day', label: '1 day before' },
+];
 
 export default function NewTaskPage() {
   const navigate = useNavigate();
@@ -28,8 +45,55 @@ export default function NewTaskPage() {
   const [category, setCategory] = useState<number | null>(null);
   const [priority, setPriority] = useState<number>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Reminders state
+  const [reminders, setReminders] = useState<ReminderInput[]>([]);
 
   const { data: categories, isLoading: isCategoriesLoading, error: categoriesError } = useCategories();
+
+  const addReminder = () => {
+    const newReminder: ReminderInput = {
+      id: Date.now().toString(),
+      type: 'preset',
+      preset: '10min'
+    };
+    setReminders([...reminders, newReminder]);
+  };
+
+  const updateReminder = (id: string, updates: Partial<ReminderInput>) => {
+    setReminders(reminders.map(reminder => 
+      reminder.id === id ? { ...reminder, ...updates } : reminder
+    ));
+  };
+
+  const removeReminder = (id: string) => {
+    setReminders(reminders.filter(reminder => reminder.id !== id));
+  };
+
+  const calculateReminderTime = (taskDate: Date, taskStartTime: string, reminderInput: ReminderInput): Date => {
+    const [hours, minutes] = taskStartTime.split(':').map(Number);
+    const taskDateTime = new Date(taskDate);
+    taskDateTime.setHours(hours, minutes, 0, 0);
+
+    if (reminderInput.type === 'custom' && reminderInput.customDateTime) {
+      return reminderInput.customDateTime;
+    }
+
+    switch (reminderInput.preset) {
+      case '10min':
+        return subMinutes(taskDateTime, 10);
+      case '30min':
+        return subMinutes(taskDateTime, 30);
+      case '1hour':
+        return subHours(taskDateTime, 1);
+      case '2hours':
+        return subHours(taskDateTime, 2);
+      case '1day':
+        return subDays(taskDateTime, 1);
+      default:
+        return subMinutes(taskDateTime, 10);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,11 +125,31 @@ export default function NewTaskPage() {
         category: category,
       };
 
-      // Initialize the API with custom axios
-      const api = new TasksApi(undefined, undefined, customAxios);
+      // Initialize the APIs with custom axios
+      const tasksApi = new TasksApi(undefined, undefined, customAxios);
+      const remindersApi = new RemindersApi(undefined, undefined, customAxios);
       
       // Submit the task
-      await api.tasksCreate(taskData);
+      const taskResponse = await tasksApi.tasksCreate(taskData);
+      const createdTask = taskResponse.data;
+
+      // Create reminders if any exist and we have a valid task date/time
+      if (reminders.length > 0 && date && createdTask.id) {
+        const reminderPromises = reminders.map(reminderInput => {
+          const reminderTime = calculateReminderTime(date, startTime, reminderInput);
+          
+          const reminderData: Reminder = {
+            task: createdTask.id!,
+            reminder_time: format(reminderTime, "yyyy-MM-dd'T'HH:mm:ss"),
+            email_status: ReminderEmailStatusEnum.Pending,
+            in_app_status: ReminderInAppStatusEnum.Pending,
+          };
+
+          return remindersApi.remindersRemindersCreate(reminderData);
+        });
+
+        await Promise.all(reminderPromises);
+      }
       
       // Redirect on success
       navigate("/tasks");
@@ -93,7 +177,7 @@ export default function NewTaskPage() {
                 <CardTitle>Task Details</CardTitle>
                 <CardDescription>Enter the details for your new task</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-6">
                 <div className="space-y-2">
                   <Label htmlFor="title">Title</Label>
                   <Input 
@@ -114,7 +198,7 @@ export default function NewTaskPage() {
                     onChange={(e) => setDescription(e.target.value)}
                   />
                 </div>
-                {/* <div className="grid grid-cols-2 md:grid-cols-2 gap-4"> */}
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="category">Category</Label>
@@ -171,6 +255,7 @@ export default function NewTaskPage() {
                     </Select>
                   </div>
                 </div>
+
                 <div className="grid grid-cols-1 gap-4">
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -214,6 +299,153 @@ export default function NewTaskPage() {
                         />
                       </div>
                     </div>
+                  </div>
+                </div>
+
+                {/* Reminders Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4" />
+                      <Label className="text-base font-medium">Reminders</Label>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addReminder}
+                      className="flex items-center gap-2"
+                    >
+                      <Plus className="h-4 w-4" />
+                      Add Reminder
+                    </Button>
+                  </div>
+
+                  {reminders.length === 0 && (
+                    <div className="text-sm text-muted-foreground py-4 text-center border-2 border-dashed rounded-lg">
+                      No reminders set. Click "Add Reminder" to create one.
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    {reminders.map((reminder, index) => (
+                      <div
+                        key={reminder.id}
+                        className="flex items-start gap-3 p-4 border rounded-lg bg-muted/30"
+                      >
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-muted-foreground">
+                              Reminder {index + 1}
+                            </span>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <Label>Reminder Type</Label>
+                            <Select
+                              value={reminder.type === 'custom' ? 'custom' : reminder.preset}
+                              onValueChange={(value) => {
+                                if (value === 'custom') {
+                                  updateReminder(reminder.id, {
+                                    type: 'custom',
+                                    preset: undefined,
+                                    customDateTime: new Date()
+                                  });
+                                } else {
+                                  updateReminder(reminder.id, {
+                                    type: 'preset',
+                                    preset: value,
+                                    customDateTime: undefined
+                                  });
+                                }
+                              }}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select reminder time" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {REMINDER_PRESETS.map((preset) => (
+                                  <SelectItem key={preset.value} value={preset.value}>
+                                    {preset.label}
+                                  </SelectItem>
+                                ))}
+                                <SelectItem value="custom">Custom</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {reminder.type === 'custom' && (
+                            <div className="space-y-2">
+                              <Label>Custom Reminder Time</Label>
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className={cn(
+                                      "w-full justify-start text-left font-normal",
+                                      !reminder.customDateTime && "text-muted-foreground"
+                                    )}
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {reminder.customDateTime 
+                                      ? format(reminder.customDateTime, "PPP 'at' p") 
+                                      : "Select custom time"
+                                    }
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                  <Calendar
+                                    mode="single"
+                                    selected={reminder.customDateTime}
+                                    onSelect={(date) => {
+                                      if (date) {
+                                        const newDateTime = new Date(date);
+                                        if (reminder.customDateTime) {
+                                          newDateTime.setHours(
+                                            reminder.customDateTime.getHours(),
+                                            reminder.customDateTime.getMinutes()
+                                          );
+                                        }
+                                        updateReminder(reminder.id, { customDateTime: newDateTime });
+                                      }
+                                    }}
+                                    initialFocus
+                                  />
+                                  <div className="p-3 border-t">
+                                    <Label className="text-sm">Time</Label>
+                                    <Input
+                                      type="time"
+                                      value={
+                                        reminder.customDateTime
+                                          ? format(reminder.customDateTime, "HH:mm")
+                                          : "09:00"
+                                      }
+                                      onChange={(e) => {
+                                        const [hours, minutes] = e.target.value.split(':').map(Number);
+                                        const newDateTime = reminder.customDateTime || new Date();
+                                        newDateTime.setHours(hours, minutes);
+                                        updateReminder(reminder.id, { customDateTime: newDateTime });
+                                      }}
+                                      className="mt-1"
+                                    />
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          )}
+                        </div>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeReminder(reminder.id)}
+                          className="text-muted-foreground hover:text-destructive shrink-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </CardContent>

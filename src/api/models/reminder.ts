@@ -43,13 +43,13 @@ export interface Reminder {
      * @type {string}
      * @memberof Reminder
      */
-    'method'?: ReminderMethodEnum;
+    'email_status'?: ReminderEmailStatusEnum | null;
     /**
      * 
      * @type {string}
      * @memberof Reminder
      */
-    'status'?: ReminderStatusEnum;
+    'in_app_status'?: ReminderInAppStatusEnum | null;
     /**
      * 
      * @type {string}
@@ -58,18 +58,19 @@ export interface Reminder {
     'created_at'?: string;
 }
 
-export const ReminderMethodEnum = {
-    Email: 'email',
-    InApp: 'in_app'
-} as const;
-
-export type ReminderMethodEnum = typeof ReminderMethodEnum[keyof typeof ReminderMethodEnum];
-export const ReminderStatusEnum = {
+export const ReminderEmailStatusEnum = {
     Pending: 'pending',
     Sent: 'sent',
     Failed: 'failed'
 } as const;
 
-export type ReminderStatusEnum = typeof ReminderStatusEnum[keyof typeof ReminderStatusEnum];
+export type ReminderEmailStatusEnum = typeof ReminderEmailStatusEnum[keyof typeof ReminderEmailStatusEnum];
+export const ReminderInAppStatusEnum = {
+    Pending: 'pending',
+    Sent: 'sent',
+    Failed: 'failed'
+} as const;
+
+export type ReminderInAppStatusEnum = typeof ReminderInAppStatusEnum[keyof typeof ReminderInAppStatusEnum];
 
 

@@ -9,9 +9,6 @@ import { MessageCircle, Send, Bot, X, Minimize2, Maximize2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ChatMessage from "./chat-message"
 import VoiceInput from "./voice-input"
-// import TaskSummaryCard from "./task-summary-card"
-// import TaskVerificationModal from "./task-verification-modal"
-// import { Task, TaskStatusEnum } from "@/api/models/task"
 import { AIAssistantApi } from "@/api/apis/aiassistant-api"
 import { AiTaskAssistantRequest } from "@/api/models/ai-task-assistant-request"
 import { AiTaskAssistant200Response } from "@/api/models/ai-task-assistant200-response"
@@ -45,7 +42,6 @@ const initialMessages: ChatMessageType[] = [
 export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssistantPanelProps) {
   const [messages, setMessages] = useState<ChatMessageType[]>(initialMessages)
   const [inputValue, setInputValue] = useState("")
-  const [isListening, setIsListening] = useState(false)
   const [isMinimized, setIsMinimized] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
@@ -127,8 +123,9 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
     setMessages((prev) => [...prev, assistantMessage])
   }
 
-  const handleVoiceInput = (transcript: string) => {
-    setInputValue(transcript)
+  const handleVoiceInput = (response: AiTaskAssistant200Response) => {
+    // Add the AI response directly to messages since voiceToText returns complete response
+    handleApiResponse(response);
   }
 
   if (!isOpen) {
@@ -235,9 +232,7 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
                     className={cn("pr-12", isMobile && "h-12 text-base")}
                   />
                   <VoiceInput
-                    onTranscript={handleVoiceInput}
-                    isListening={isListening}
-                    onListeningChange={setIsListening}
+                    onResponse={handleVoiceInput}
                     isMobile={isMobile}
                   />
                 </div>

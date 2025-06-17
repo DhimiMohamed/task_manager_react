@@ -13,7 +13,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Category } from '../../api/models/category';
+import { Category } from "../../api/models/category"
 
 interface CategoryListProps {
   categories: Category[]
@@ -51,7 +51,6 @@ export default function CategoryList({ categories, onEdit, onDelete, isDeleting 
               </TableCell>
               <TableCell className="font-medium">{category.name}</TableCell>
               <TableCell>
-                {/* This would be populated with actual task count in a real app */}
                 {Math.floor(Math.random() * 10)} tasks
               </TableCell>
               <TableCell>
@@ -63,13 +62,23 @@ export default function CategoryList({ categories, onEdit, onDelete, isDeleting 
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onEdit(category)}>
+                    <DropdownMenuItem
+                      onSelect={() => {
+                        requestAnimationFrame(() => {
+                          onEdit(category)
+                        })
+                      }}
+                    >
                       <Edit className="h-4 w-4 mr-2" />
                       Edit
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       className="text-red-600 focus:text-red-600"
-                      onClick={() => setDeleteId(category.id ?? null)}
+                      onSelect={() => {
+                        requestAnimationFrame(() => {
+                          setDeleteId(category.id ?? null)
+                        })
+                      }}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
                       Delete

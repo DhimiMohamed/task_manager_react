@@ -15,18 +15,18 @@ interface CategoryFormProps {
 }
 
 const colorOptions = [
-  { value: "#3b82f6", label: "Blue" },      // bg-blue-500
-  { value: "#10b981", label: "Green" },     // bg-green-500
-  { value: "#ef4444", label: "Red" },       // bg-red-500
-  { value: "#f59e0b", label: "Yellow" },    // bg-yellow-500
-  { value: "#8b5cf6", label: "Purple" },    // bg-purple-500
-  { value: "#ec4899", label: "Pink" },      // bg-pink-500
-  { value: "#6366f1", label: "Indigo" },    // bg-indigo-500
-  { value: "#f97316", label: "Orange" },    // bg-orange-500
-  { value: "#14b8a6", label: "Teal" },      // bg-teal-500
-  { value: "#06b6d4", label: "Cyan" },      // bg-cyan-500
-  { value: "#84cc16", label: "Lime" },      // bg-lime-500
-  { value: "#22c55e", label: "Emerald" },    // bg-emerald-500
+  { value: "#3b82f6", label: "Blue" },
+  { value: "#10b981", label: "Green" },
+  { value: "#ef4444", label: "Red" },
+  { value: "#f59e0b", label: "Yellow" },
+  { value: "#8b5cf6", label: "Purple" },
+  { value: "#ec4899", label: "Pink" },
+  { value: "#6366f1", label: "Indigo" },
+  { value: "#f97316", label: "Orange" },
+  { value: "#14b8a6", label: "Teal" },
+  { value: "#06b6d4", label: "Cyan" },
+  { value: "#84cc16", label: "Lime" },
+  { value: "#22c55e", label: "Emerald" },
 ];
 
 export default function CategoryForm({ category, onSubmit, isSubmitting }: CategoryFormProps) {

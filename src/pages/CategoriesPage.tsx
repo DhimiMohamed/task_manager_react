@@ -1,47 +1,73 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { PlusCircle } from "lucide-react"
 import CategoryList from "@/components/categories/category-list"
 import CategoryForm from "@/components/categories/category-form"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { useCategories, useCreateCategory, useUpdateCategory, useDeleteCategory } from "@/hooks/useCategories"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription,
+} from "@/components/ui/dialog"
+import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useDeleteCategory,
+} from "@/hooks/useCategories"
 import { Category } from "@/api"
 
 export default function CategoriesPage() {
-  const { data: categories = [], isLoading, isError } = useCategories();
-  const createMutation = useCreateCategory();
-  const updateMutation = useUpdateCategory();
-  const deleteMutation = useDeleteCategory();
-  
+  const { data: categories = [], isLoading, isError } = useCategories()
+  const createMutation = useCreateCategory()
+  const updateMutation = useUpdateCategory()
+  const deleteMutation = useDeleteCategory()
+
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
 
   const handleAddCategory = (category: Omit<Category, "id">) => {
-    createMutation.mutate(category);
+    createMutation.mutate(category)
   }
 
   const handleUpdateCategory = (updatedCategory: Category) => {
-    updateMutation.mutate(updatedCategory);
-    setEditingCategory(null);
+    updateMutation.mutate(updatedCategory, {
+      onSuccess: () => {
+        setEditingCategory(null)
+      },
+    })
   }
 
   const handleDeleteCategory = (id: number) => {
-    deleteMutation.mutate(id);
+    deleteMutation.mutate(id)
   }
 
+  // Wrap edit trigger in requestAnimationFrame to prevent aria-hidden issue
   const handleEditCategory = (category: Category) => {
-    setEditingCategory(category);
+    requestAnimationFrame(() => {
+      setEditingCategory(category)
+    })
   }
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError) return <div>Error loading categories</div>;
+  if (isLoading) return <div>Loading...</div>
+  if (isError) return <div>Error loading categories</div>
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Categories</h1>
-          <p className="text-muted-foreground">Manage and organize your task categories</p>
+          <p className="text-muted-foreground">
+            Manage and organize your task categories
+          </p>
         </div>
         <Dialog>
           <DialogTrigger asChild>
@@ -53,10 +79,13 @@ export default function CategoriesPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Create New Category</DialogTitle>
+              <DialogDescription>
+                Create a new task category
+              </DialogDescription>
             </DialogHeader>
-            <CategoryForm 
-              onSubmit={handleAddCategory} 
-              isSubmitting={createMutation.isPending} 
+            <CategoryForm
+              onSubmit={handleAddCategory}
+              isSubmitting={createMutation.isPending}
             />
           </DialogContent>
         </Dialog>
@@ -65,33 +94,48 @@ export default function CategoriesPage() {
       <Card>
         <CardHeader>
           <CardTitle>Category List</CardTitle>
-          <CardDescription>Manage your task categories and their colors</CardDescription>
+          <CardDescription>
+            Manage your task categories and their colors
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <CategoryList 
-            categories={categories} 
-            onEdit={handleEditCategory} 
-            onDelete={handleDeleteCategory} 
+          <CategoryList
+            categories={categories}
+            onEdit={handleEditCategory}
+            onDelete={handleDeleteCategory}
             isDeleting={deleteMutation.isPending}
           />
         </CardContent>
       </Card>
 
-      {/* Edit Category Dialog */}
-      {editingCategory && (
-        <Dialog open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Category</DialogTitle>
-            </DialogHeader>
+      {/* Edit Dialog */}
+      <Dialog
+        open={!!editingCategory}
+        onOpenChange={(open) => {
+          if (!open) setEditingCategory(null)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Category</DialogTitle>
+            <DialogDescription>
+              Edit category details
+            </DialogDescription>
+          </DialogHeader>
+          {editingCategory && (
             <CategoryForm
               category={editingCategory}
-              onSubmit={(updatedCategory) => handleUpdateCategory({ ...updatedCategory, id: editingCategory.id })}
+              onSubmit={(updatedCategory) =>
+                handleUpdateCategory({
+                  ...updatedCategory,
+                  id: editingCategory.id,
+                })
+              }
               isSubmitting={updateMutation.isPending}
             />
-          </DialogContent>
-        </Dialog>
-      )}
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

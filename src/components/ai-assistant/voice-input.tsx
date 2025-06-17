@@ -1,92 +1,107 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Mic, MicOff } from "lucide-react";
+import { Mic, MicOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AIAssistantApi } from "@/api/apis/aiassistant-api";
+import customAxios from "@/lib/customAxios";
 
 interface VoiceInputProps {
-  onTranscript: (transcript: string) => void;
-  isListening: boolean;
-  onListeningChange: (listening: boolean) => void;
+  onResponse: (response: any) => void; // Changed from onTranscript to onResponse
   isMobile?: boolean;
 }
 
 export default function VoiceInput({
-  onTranscript,
-  isListening,
-  onListeningChange,
+  onResponse, // Changed from onTranscript to onResponse
   isMobile = false,
 }: VoiceInputProps) {
-  const [isSupported, setIsSupported] = useState(false);
-  const [transcript, setTranscript] = useState("");
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isSupported, setIsSupported] = useState(true);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      if (SpeechRecognition) {
-        setIsSupported(true);
-
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        recognition.lang = "en-US";
-
-        recognition.onstart = () => {
-          onListeningChange(true);
-        };
-
-        recognition.onresult = (event: SpeechRecognitionEvent) => {
-          let finalTranscript = "";
-          let interimTranscript = "";
-
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const transcript = event.results[i][0].transcript;
-            if (event.results[i].isFinal) {
-              finalTranscript += transcript;
-            } else {
-              interimTranscript += transcript;
-            }
-          }
-
-          setTranscript(interimTranscript);
-
-          if (finalTranscript) {
-            onTranscript(finalTranscript);
-            setTranscript("");
-          }
-        };
-
-        recognition.onend = () => {
-          onListeningChange(false);
-          setTranscript("");
-        };
-
-        recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
-          console.error("Speech recognition error:", event.error);
-          onListeningChange(false);
-          setTranscript("");
-        };
-
-        recognitionRef.current = recognition;
+      // Check if MediaRecorder is supported
+      if (!MediaRecorder.isTypeSupported('audio/webm')) {
+        console.warn('audio/webm not supported, falling back to default');
       }
+      
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : undefined
+      });
+      
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data);
+        }
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { 
+          type: mediaRecorder.mimeType || 'audio/webm' 
+        });
+        
+        // Stop all tracks to release microphone
+        stream.getTracks().forEach(track => track.stop());
+        
+        await processAudio(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (error) {
+      console.error('Error accessing microphone:', error);
+      setIsSupported(false);
     }
+  };
 
-    return () => {
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
-    };
-  }, [onTranscript, onListeningChange]);
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
+  };
 
-  const toggleListening = () => {
-    if (!recognitionRef.current) return;
+  const processAudio = async (audioBlob: Blob) => {
+    setIsProcessing(true);
+    
+    try {
+      // Convert blob to File
+      const audioFile = new File([audioBlob], 'recording.webm', { 
+        type: audioBlob.type 
+      });
 
-    if (isListening) {
-      recognitionRef.current.stop();
+      const aiAssistantApi = new AIAssistantApi(undefined, undefined, customAxios);
+      const response = await aiAssistantApi.voiceToText(audioFile);
+      
+      // Since voiceToText returns the complete AI response, pass it directly
+      onResponse(response.data);
+    } catch (error) {
+      console.error('Error processing audio:', error);
+      // Create error response in the same format as the API
+      onResponse({
+        response: {
+          user_message: 'Error processing audio. Please try again.',
+          details: [],
+          tool_results: []
+        }
+      });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const toggleRecording = () => {
+    if (isRecording) {
+      stopRecording();
     } else {
-      recognitionRef.current.start();
+      startRecording();
     }
   };
 
@@ -94,29 +109,39 @@ export default function VoiceInput({
     return null;
   }
 
+  const isActive = isRecording || isProcessing;
+
   return (
     <div className={cn("absolute top-1/2 transform -translate-y-1/2", isMobile ? "right-3" : "right-2")}>
       <Button
         type="button"
         variant="ghost"
         size="icon"
-        className={cn(isListening && "text-red-500 animate-pulse", isMobile ? "h-10 w-10" : "h-8 w-8")}
-        onClick={toggleListening}
+        className={cn(
+          isRecording && "text-red-500 animate-pulse",
+          isProcessing && "text-blue-500",
+          isMobile ? "h-10 w-10" : "h-8 w-8"
+        )}
+        onClick={toggleRecording}
+        disabled={isProcessing}
       >
-        {isListening ? (
+        {isProcessing ? (
+          <Loader2 className={cn("animate-spin", isMobile ? "h-5 w-5" : "h-4 w-4")} />
+        ) : isRecording ? (
           <MicOff className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
         ) : (
           <Mic className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
         )}
       </Button>
-      {transcript && (
+      
+      {isActive && (
         <div
           className={cn(
             "absolute bottom-full mb-2 bg-background border rounded-md p-2 text-xs shadow-lg z-10",
             isMobile ? "right-0 max-w-64" : "right-0 max-w-48",
           )}
         >
-          {transcript}
+          {isRecording ? "Recording..." : "Processing..."}
         </div>
       )}
     </div>

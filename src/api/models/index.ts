@@ -1,5 +1,6 @@
 export * from './accounts-login-create200-response';
 export * from './accounts-logout-create-request';
+export * from './accounts-notifications-mark-all-as-read-create200-response';
 export * from './accounts-password-reset-request-create-request';
 export * from './accounts-password-reset-reset-password-create-request';
 export * from './accounts-password-reset-verify-otp-create-request';
@@ -12,6 +13,7 @@ export * from './ai-task-assistant401-response';
 export * from './ai-task-assistant500-response';
 export * from './ai-task-assistant-request';
 export * from './category';
+export * from './notification';
 export * from './profile';
 export * from './reminder';
 export * from './task';

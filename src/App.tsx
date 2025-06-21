@@ -12,6 +12,7 @@ import NewTaskPage from './pages/NewTaskPage';
 import CategoriesPage from './pages/CategoriesPage';
 import TasksPage from './pages/TasksPage';
 import AIAssistantToggle from './components/ai-assistant-toggle';
+import NotificationsPage from './pages/NotificationsPage';
 
 function App() {
   return (
@@ -61,6 +62,7 @@ function LayoutWithSidebar() {
           {/* <Route path="tasks" element={<Tasks />} /> */}
           <Route path="tasks" element={<TasksPage />} />
           <Route path="tasks/new" element={<NewTaskPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
         </Routes>
       </main>
       <AIAssistantToggle/>

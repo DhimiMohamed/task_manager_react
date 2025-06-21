@@ -12,6 +12,7 @@ git_push.sh
 index.ts
 models/accounts-login-create200-response.ts
 models/accounts-logout-create-request.ts
+models/accounts-notifications-mark-all-as-read-create200-response.ts
 models/accounts-password-reset-request-create-request.ts
 models/accounts-password-reset-reset-password-create-request.ts
 models/accounts-password-reset-verify-otp-create-request.ts
@@ -25,6 +26,7 @@ models/ai-task-assistant401-response.ts
 models/ai-task-assistant500-response.ts
 models/category.ts
 models/index.ts
+models/notification.ts
 models/profile.ts
 models/reminder.ts
 models/task.ts

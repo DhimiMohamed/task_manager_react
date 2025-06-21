@@ -26,6 +26,8 @@ import type { AccountsLoginCreate200Response } from '../models';
 // @ts-ignore
 import type { AccountsLogoutCreateRequest } from '../models';
 // @ts-ignore
+import type { AccountsNotificationsMarkAllAsReadCreate200Response } from '../models';
+// @ts-ignore
 import type { AccountsPasswordResetRequestCreateRequest } from '../models';
 // @ts-ignore
 import type { AccountsPasswordResetResetPasswordCreateRequest } from '../models';
@@ -33,6 +35,8 @@ import type { AccountsPasswordResetResetPasswordCreateRequest } from '../models'
 import type { AccountsPasswordResetVerifyOtpCreateRequest } from '../models';
 // @ts-ignore
 import type { AccountsResendVerificationCreateRequest } from '../models';
+// @ts-ignore
+import type { Notification } from '../models';
 // @ts-ignore
 import type { Profile } from '../models';
 // @ts-ignore
@@ -106,6 +110,154 @@ export const AccountsApiAxiosParamCreator = function (configuration?: Configurat
             }
 
             const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * List all notifications for the authenticated user (most recent first)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        accountsNotificationsList: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/accounts/notifications/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Mark all unread notifications as read
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        accountsNotificationsMarkAllAsReadCreate: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/accounts/notifications/mark-all-as-read/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Mark a specific notification as read
+         * @param {string} id 
+         * @param {Notification} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        accountsNotificationsMarkAsReadPartialUpdate: async (id: string, data: Notification, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('accountsNotificationsMarkAsReadPartialUpdate', 'id', id)
+            // verify required parameter 'data' is not null or undefined
+            assertParamExists('accountsNotificationsMarkAsReadPartialUpdate', 'data', data)
+            const localVarPath = `/accounts/notifications/{id}/mark-as-read/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * View to mark a notification as read. Only allows marking notifications owned by the current user.
+         * @param {string} id 
+         * @param {Notification} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        accountsNotificationsMarkAsReadUpdate: async (id: string, data: Notification, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('accountsNotificationsMarkAsReadUpdate', 'id', id)
+            // verify required parameter 'data' is not null or undefined
+            assertParamExists('accountsNotificationsMarkAsReadUpdate', 'data', data)
+            const localVarPath = `/accounts/notifications/{id}/mark-as-read/`
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -429,7 +581,7 @@ export const AccountsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
+         * Partially update user settings
          * @param {UserSettings} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -467,7 +619,7 @@ export const AccountsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
+         * Retrieve user settings
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -499,7 +651,7 @@ export const AccountsApiAxiosParamCreator = function (configuration?: Configurat
             };
         },
         /**
-         * 
+         * Update all user settings
          * @param {UserSettings} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -651,6 +803,54 @@ export const AccountsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * List all notifications for the authenticated user (most recent first)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async accountsNotificationsList(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<Notification>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.accountsNotificationsList(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AccountsApi.accountsNotificationsList']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Mark all unread notifications as read
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async accountsNotificationsMarkAllAsReadCreate(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AccountsNotificationsMarkAllAsReadCreate200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.accountsNotificationsMarkAllAsReadCreate(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AccountsApi.accountsNotificationsMarkAllAsReadCreate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Mark a specific notification as read
+         * @param {string} id 
+         * @param {Notification} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async accountsNotificationsMarkAsReadPartialUpdate(id: string, data: Notification, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Notification>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.accountsNotificationsMarkAsReadPartialUpdate(id, data, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AccountsApi.accountsNotificationsMarkAsReadPartialUpdate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * View to mark a notification as read. Only allows marking notifications owned by the current user.
+         * @param {string} id 
+         * @param {Notification} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async accountsNotificationsMarkAsReadUpdate(id: string, data: Notification, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Notification>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.accountsNotificationsMarkAsReadUpdate(id, data, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['AccountsApi.accountsNotificationsMarkAsReadUpdate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * Sends a 6-digit OTP to the user\'s email if the email is associated with an account.
          * @summary Request password reset
          * @param {AccountsPasswordResetRequestCreateRequest} data 
@@ -750,7 +950,7 @@ export const AccountsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * Partially update user settings
          * @param {UserSettings} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -762,7 +962,7 @@ export const AccountsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * Retrieve user settings
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -773,7 +973,7 @@ export const AccountsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * Update all user settings
          * @param {UserSettings} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -838,6 +1038,42 @@ export const AccountsApiFactory = function (configuration?: Configuration, baseP
          */
         accountsLogoutCreate(data: AccountsLogoutCreateRequest, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.accountsLogoutCreate(data, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * List all notifications for the authenticated user (most recent first)
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        accountsNotificationsList(options?: RawAxiosRequestConfig): AxiosPromise<Array<Notification>> {
+            return localVarFp.accountsNotificationsList(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Mark all unread notifications as read
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        accountsNotificationsMarkAllAsReadCreate(options?: RawAxiosRequestConfig): AxiosPromise<AccountsNotificationsMarkAllAsReadCreate200Response> {
+            return localVarFp.accountsNotificationsMarkAllAsReadCreate(options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Mark a specific notification as read
+         * @param {string} id 
+         * @param {Notification} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        accountsNotificationsMarkAsReadPartialUpdate(id: string, data: Notification, options?: RawAxiosRequestConfig): AxiosPromise<Notification> {
+            return localVarFp.accountsNotificationsMarkAsReadPartialUpdate(id, data, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * View to mark a notification as read. Only allows marking notifications owned by the current user.
+         * @param {string} id 
+         * @param {Notification} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        accountsNotificationsMarkAsReadUpdate(id: string, data: Notification, options?: RawAxiosRequestConfig): AxiosPromise<Notification> {
+            return localVarFp.accountsNotificationsMarkAsReadUpdate(id, data, options).then((request) => request(axios, basePath));
         },
         /**
          * Sends a 6-digit OTP to the user\'s email if the email is associated with an account.
@@ -915,7 +1151,7 @@ export const AccountsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.accountsResendVerificationCreate(data, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * Partially update user settings
          * @param {UserSettings} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -924,7 +1160,7 @@ export const AccountsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.accountsSettingsPartialUpdate(data, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * Retrieve user settings
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -932,7 +1168,7 @@ export const AccountsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.accountsSettingsRead(options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * Update all user settings
          * @param {UserSettings} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -991,6 +1227,50 @@ export class AccountsApi extends BaseAPI {
      */
     public accountsLogoutCreate(data: AccountsLogoutCreateRequest, options?: RawAxiosRequestConfig) {
         return AccountsApiFp(this.configuration).accountsLogoutCreate(data, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * List all notifications for the authenticated user (most recent first)
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AccountsApi
+     */
+    public accountsNotificationsList(options?: RawAxiosRequestConfig) {
+        return AccountsApiFp(this.configuration).accountsNotificationsList(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Mark all unread notifications as read
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AccountsApi
+     */
+    public accountsNotificationsMarkAllAsReadCreate(options?: RawAxiosRequestConfig) {
+        return AccountsApiFp(this.configuration).accountsNotificationsMarkAllAsReadCreate(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Mark a specific notification as read
+     * @param {string} id 
+     * @param {Notification} data 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AccountsApi
+     */
+    public accountsNotificationsMarkAsReadPartialUpdate(id: string, data: Notification, options?: RawAxiosRequestConfig) {
+        return AccountsApiFp(this.configuration).accountsNotificationsMarkAsReadPartialUpdate(id, data, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * View to mark a notification as read. Only allows marking notifications owned by the current user.
+     * @param {string} id 
+     * @param {Notification} data 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AccountsApi
+     */
+    public accountsNotificationsMarkAsReadUpdate(id: string, data: Notification, options?: RawAxiosRequestConfig) {
+        return AccountsApiFp(this.configuration).accountsNotificationsMarkAsReadUpdate(id, data, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1085,7 +1365,7 @@ export class AccountsApi extends BaseAPI {
     }
 
     /**
-     * 
+     * Partially update user settings
      * @param {UserSettings} data 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -1096,7 +1376,7 @@ export class AccountsApi extends BaseAPI {
     }
 
     /**
-     * 
+     * Retrieve user settings
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof AccountsApi
@@ -1106,7 +1386,7 @@ export class AccountsApi extends BaseAPI {
     }
 
     /**
-     * 
+     * Update all user settings
      * @param {UserSettings} data 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}

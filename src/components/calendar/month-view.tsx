@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   format,
   startOfMonth,
@@ -12,7 +12,7 @@ import {
   parseISO,
   isValid,
 } from "date-fns";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -24,6 +24,9 @@ import { cn } from "@/lib/utils";
 import TaskForm from "./task-form";
 import { Task } from "@/api/models/task";
 import { Category } from "@/api/models/category";
+import { TaskDetailsDialog } from "./task-details-dialog";
+import customAxios from "@/lib/customAxios";
+import { TasksApi } from "@/api/apis/tasks-api";
 
 interface MonthViewProps {
   currentDate: Date;
@@ -34,6 +37,59 @@ interface MonthViewProps {
   categories: Category[];
   onTaskCreated: (task: Task) => void;
 }
+
+interface TaskPillProps {
+  task: Task;
+  category: Category | undefined;
+  onTaskClick: (task: Task) => void;
+  onTaskDelete: (taskId: number) => void;
+}
+
+const TaskPill = ({ task, category, onTaskClick, onTaskDelete }: TaskPillProps) => {
+  const [showDeleteButton, setShowDeleteButton] = useState(false);
+
+  return (
+    <div
+      className="text-xs px-2 py-1 rounded truncate text-white relative group cursor-pointer"
+      style={{ backgroundColor: category?.color || "#CCCCCC" }}
+      title={task.title}
+      onClick={(e) => {
+        e.stopPropagation();
+        onTaskClick(task);
+      }}
+      onMouseEnter={() => setShowDeleteButton(true)}
+      onMouseLeave={() => setShowDeleteButton(false)}
+    >
+      {formatTaskTime(task.start_time)}
+      {task.title}
+      
+      {showDeleteButton && (
+        <button
+          className="absolute top-0 right-0 -mt-1 -mr-1 bg-white/20 rounded-full p-0.5 hover:bg-white/30"
+          onClick={(e) => {
+            e.stopPropagation();
+            onTaskDelete(task.id!);
+          }}
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
+    </div>
+  );
+};
+
+const formatTaskTime = (timeString: string | null | undefined) => {
+  if (!timeString) return "";
+  try {
+    const tempDate = new Date(`2000-01-01T${timeString}`);
+    if (isValid(tempDate)) {
+      return format(tempDate, "HH:mm") + " ";
+    }
+  } catch (e) {
+    console.error("Error formatting time:", timeString);
+  }
+  return "";
+};
 
 export default function MonthView({
   currentDate,
@@ -46,6 +102,13 @@ export default function MonthView({
 }: MonthViewProps) {
   const [newTaskDate, setNewTaskDate] = useState<Date | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+
+  // Debugging useEffect
+  useEffect(() => {
+    console.log("Tasks in MonthView:", tasks);
+  }, [tasks]);
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -69,33 +132,44 @@ export default function MonthView({
 
   const getTasksForDay = (day: Date) => {
     return tasks.filter((task) => {
+      // Skip if task has no category or category not selected
       if (!task.category || !selectedCategories.includes(task.category)) {
         return false;
       }
-      if (task.due_date) {
-        try {
-          const dueDate = parseISO(task.due_date);
-          return isSameDay(dueDate, day);
-        } catch (e) {
-          console.error("Error parsing due_date:", task.due_date);
-          return false;
-        }
+      
+      // Skip if no due date
+      if (!task.due_date) return false;
+      
+      try {
+        const dueDate = parseISO(task.due_date);
+        return isSameDay(dueDate, day);
+      } catch (e) {
+        console.error("Error parsing due_date:", task.due_date);
+        return false;
       }
-      return false;
     });
   };
 
-  const formatTaskTime = (timeString: string | null | undefined) => {
-    if (!timeString) return "";
-    try {
-      const tempDate = new Date(`2000-01-01T${timeString}`);
-      if (isValid(tempDate)) {
-        return format(tempDate, "HH:mm") + " ";
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsDetailsDialogOpen(true);
+  };
+
+  const handleTaskDelete = async (taskId: number) => {
+    if (confirm("Delete this task permanently?")) {
+      try {
+        const tasksApi = new TasksApi(undefined, undefined, customAxios);
+        await tasksApi.tasksDelete(taskId.toString());
+        // Notify parent component of deletion
+        onTaskCreated({ id: taskId } as Task);
+      } catch (error) {
+        console.error("Error deleting task:", error);
       }
-    } catch (e) {
-      console.error("Error formatting time:", timeString);
     }
-    return "";
+  };
+
+  const handleTaskUpdated = (updatedTask: Task) => {
+    onTaskCreated(updatedTask);
   };
 
   const fullDayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -160,18 +234,14 @@ export default function MonthView({
                 <div className="mt-0 space-y-1 max-h-[80px] overflow-y-auto">
                   {dayTasks.map((task) => {
                     const category = categories.find((c) => c.id === task.category);
-                    const backgroundColor = category?.color || "#CCCCCC";
-
                     return (
-                      <div
+                      <TaskPill
                         key={task.id}
-                        className="text-xs px-2 py-1 rounded truncate text-white"
-                        style={{ backgroundColor }}
-                        title={task.title}
-                      >
-                        {formatTaskTime(task.start_time)}
-                        {task.title}
-                      </div>
+                        task={task}
+                        category={category}
+                        onTaskClick={handleTaskClick}
+                        onTaskDelete={handleTaskDelete}
+                      />
                     );
                   })}
                 </div>
@@ -197,6 +267,17 @@ export default function MonthView({
           />
         </DialogContent>
       </Dialog>
+
+      {selectedTask && (
+        <TaskDetailsDialog
+          task={selectedTask}
+          categories={categories}
+          isOpen={isDetailsDialogOpen}
+          onClose={() => setIsDetailsDialogOpen(false)}
+          onTaskUpdated={handleTaskUpdated}
+          onTaskDeleted={handleTaskDelete}
+        />
+      )}
     </div>
   );
 }

@@ -79,8 +79,24 @@ export default function CalendarPage() {
     );
   };
 
-  const handleTaskCreated = (newTask: Task) => {
-    setTasks((prevTasks) => [...prevTasks, newTask]);
+  const handleTaskCreated = (task: Task) => {
+    setTasks((prevTasks) => {
+      // Handle deletion case (task object with only id)
+      if (Object.keys(task).length === 1 && task.id) {
+        return prevTasks.filter(t => t.id !== task.id);
+      }
+      
+      // Check if task exists (update case)
+      const existingIndex = prevTasks.findIndex(t => t.id === task.id);
+      if (existingIndex >= 0) {
+        const newTasks = [...prevTasks];
+        newTasks[existingIndex] = task;
+        return newTasks;
+      }
+      
+      // Handle creation case
+      return [...prevTasks, task];
+    });
   };
 
   const formatWeekRange = (date: Date) => {
@@ -119,7 +135,6 @@ export default function CalendarPage() {
             className="h-full flex flex-col"
           >
             <div className="flex flex-col sm:flex-row items-center justify-between px-2 sm:px-4 pt-0 gap-2">
-              {/* Left side: prev/date/next */}
               <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto justify-between sm:justify-start">
                 <Button
                   variant="ghost"
@@ -148,7 +163,6 @@ export default function CalendarPage() {
                 </Button>
               </div>
 
-              {/* Right side: Tabs */}
               <div className="w-full sm:w-auto">
                 <TabsList className="w-full">
                   <TabsTrigger value="month" className="flex-1 sm:flex-none">Month</TabsTrigger>

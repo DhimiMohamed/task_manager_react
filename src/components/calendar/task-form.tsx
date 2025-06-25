@@ -1,5 +1,4 @@
 "use client"
-// src\components\calendar\task-form.tsx
 import customAxios from "../../lib/customAxios"
 import { useState } from "react"
 import { format, subMinutes, subHours, subDays } from "date-fns"
@@ -40,6 +39,7 @@ interface TaskFormProps {
   categories: Category[]
   onSuccess?: (newTask: Task) => void
   onCancel?: () => void
+  taskToEdit?: Task
 }
 
 export default function TaskForm({ 
@@ -47,18 +47,25 @@ export default function TaskForm({
   initialHour = 9, 
   categories, 
   onSuccess, 
-  onCancel 
+  onCancel,
+  taskToEdit 
 }: TaskFormProps) {
-  const [date, setDate] = useState<Date | undefined>(initialDate || new Date())
-  const [startTime, setStartTime] = useState(initialHour ? `${initialHour.toString().padStart(2, "0")}:00` : "09:00")
-  const [endTime, setEndTime] = useState(initialHour ? `${(initialHour + 1).toString().padStart(2, "0")}:00` : "10:00")
+  const [date, setDate] = useState<Date | undefined>(
+    taskToEdit?.due_date ? new Date(taskToEdit.due_date) : initialDate || new Date()
+  );
+  const [startTime, setStartTime] = useState(
+    taskToEdit?.start_time || (initialHour ? `${initialHour.toString().padStart(2, "0")}:00` : "09:00")
+  );
+  const [endTime, setEndTime] = useState(
+    taskToEdit?.end_time || (initialHour ? `${(initialHour + 1).toString().padStart(2, "0")}:00` : "10:00")
+  );
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
-    categories.length > 0 ? categories[0].id?.toString() || "" : ""
-  )
-  const [isSubmitting, setIsSubmitting] = useState(false)
+    taskToEdit?.category?.toString() || (categories.length > 0 ? categories[0].id?.toString() || "" : "")
+  );
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Reminders state
-  const [reminders, setReminders] = useState<ReminderInput[]>([])
+  const [reminders, setReminders] = useState<ReminderInput[]>([]);
 
   const addReminder = () => {
     const newReminder: ReminderInput = {
@@ -105,14 +112,14 @@ export default function TaskForm({
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+    e.preventDefault();
+    setIsSubmitting(true);
     
-    const toastId = toast.loading("Creating task...")
+    const toastId = toast.loading(taskToEdit ? "Updating task..." : "Creating task...");
     
     try {
-      const form = e.currentTarget as HTMLFormElement
-      const formData = new FormData(form)
+      const form = e.currentTarget as HTMLFormElement;
+      const formData = new FormData(form);
       
       const taskData: Task = {
         title: formData.get('title') as string,
@@ -120,24 +127,29 @@ export default function TaskForm({
         due_date: date ? format(date, 'yyyy-MM-dd') : null,
         start_time: startTime,
         end_time: endTime,
-        status: TaskStatusEnum.Pending,
-        priority: 1,
+        status: taskToEdit?.status || TaskStatusEnum.Pending,
+        priority: taskToEdit?.priority || 1,
         category: selectedCategoryId ? parseInt(selectedCategoryId) : null,
-      }
+      };
 
-      const tasksApi = new TasksApi(undefined, undefined, customAxios)
-      const remindersApi = new RemindersApi(undefined, undefined, customAxios)
+      const tasksApi = new TasksApi(undefined, undefined, customAxios);
       
-      const response = await tasksApi.tasksCreate(taskData)
-      const createdTask = response.data
+      let response;
+      if (taskToEdit) {
+        response = await tasksApi.tasksUpdate(taskToEdit.id!.toString(), taskData);
+      } else {
+        response = await tasksApi.tasksCreate(taskData);
+      }
+      const createdOrUpdatedTask = response.data;
 
       // Create reminders if any exist and we have a valid task date/time
-      if (reminders.length > 0 && date && createdTask.id) {
+      if (reminders.length > 0 && date && createdOrUpdatedTask.id) {
+        const remindersApi = new RemindersApi(undefined, undefined, customAxios);
         const reminderPromises = reminders.map(reminderInput => {
           const reminderTime = calculateReminderTime(date, startTime, reminderInput);
           
           const reminderData: Reminder = {
-            task: createdTask.id!,
+            task: createdOrUpdatedTask.id!,
             reminder_time: format(reminderTime, "yyyy-MM-dd'T'HH:mm:ss"),
             email_status: ReminderEmailStatusEnum.Pending,
             in_app_status: ReminderInAppStatusEnum.Pending,
@@ -149,15 +161,17 @@ export default function TaskForm({
         await Promise.all(reminderPromises);
       }
       
-      toast.success("Task created successfully", { id: toastId })
-      onSuccess?.(createdTask)
+      toast.success(taskToEdit ? "Task updated successfully" : "Task created successfully", { id: toastId });
+      if (onSuccess) {
+        onSuccess(createdOrUpdatedTask);
+      }
     } catch (error) {
-      console.error("Error creating task:", error)
-      toast.error("Failed to create task", { id: toastId })
+      console.error("Error:", error);
+      toast.error(taskToEdit ? "Failed to update task" : "Failed to create task", { id: toastId });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-h-[80vh] overflow-y-auto">
@@ -169,6 +183,7 @@ export default function TaskForm({
           placeholder="Task title" 
           required 
           disabled={isSubmitting}
+          defaultValue={taskToEdit?.title}
         />
       </div>
 
@@ -180,6 +195,7 @@ export default function TaskForm({
           placeholder="Task description" 
           disabled={isSubmitting}
           className="min-h-20"
+          defaultValue={taskToEdit?.description || undefined}
         />
       </div>
 
@@ -432,9 +448,11 @@ export default function TaskForm({
           disabled={isSubmitting || !selectedCategoryId}
           size="sm"
         >
-          {isSubmitting ? "Creating..." : "Create Task"}
+          {isSubmitting 
+            ? taskToEdit ? "Updating..." : "Creating..." 
+            : taskToEdit ? "Update Task" : "Create Task"}
         </Button>
       </div>
     </form>
-  )
+  );
 }

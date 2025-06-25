@@ -32,6 +32,9 @@ models/reminder.ts
 models/task.ts
 models/tasks-extract-task-details-create-request.ts
 models/tasks-extract-task-details-create200-response.ts
+models/tasks-stats-list200-response-categories-inner.ts
+models/tasks-stats-list200-response-daily-tasks.ts
+models/tasks-stats-list200-response.ts
 models/token-refresh.ts
 models/user-login.ts
 models/user-registration.ts

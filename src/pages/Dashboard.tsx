@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import TaskOverview from "@/components/task-overview";
+import TaskOverview from "@/components/statistics/task-overview";
 import UpcomingTasks from "@/components/upcoming-tasks";
 import DailyProgress from "@/components/daily-progress";
 import { PlusCircle } from "lucide-react";

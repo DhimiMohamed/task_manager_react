@@ -7,8 +7,9 @@ import {
   isSameDay,
   differenceInMinutes,
   isValid,
+  parseISO,
 } from "date-fns";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,6 +21,9 @@ import { cn } from "@/lib/utils";
 import TaskForm from "./task-form";
 import { Task } from "@/api/models/task";
 import { Category } from "@/api/models/category";
+import { TaskDetailsDialog } from "./task-details-dialog";
+import customAxios from "@/lib/customAxios";
+import { TasksApi } from "@/api/apis/tasks-api";
 
 interface WeekViewProps {
   currentDate: Date;
@@ -38,8 +42,10 @@ export default function WeekView({
 }: WeekViewProps) {
   const [newTaskInfo, setNewTaskInfo] = useState<{ date: Date; hour: number } | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+  const [hoveredTaskId, setHoveredTaskId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -70,7 +76,7 @@ export default function WeekView({
     }
 
     try {
-      const taskDate = new Date(task.due_date);
+      const taskDate = parseISO(task.due_date);
       return isValid(taskDate) && taskDate >= weekStart && taskDate <= weekEnd;
     } catch (e) {
       console.error("Error parsing task date:", task.due_date);
@@ -114,6 +120,36 @@ export default function WeekView({
     if (!categoryId) return "#CCCCCC";
     const category = categories.find((c) => c.id === categoryId);
     return category?.color || "#CCCCCC";
+  };
+
+  const handleTaskClick = (task: Task) => {
+    setSelectedTask(task);
+    setIsDetailsDialogOpen(true);
+  };
+
+  const handleTaskDelete = async (taskId: number) => {
+    if (confirm("Delete this task permanently?")) {
+      try {
+        const tasksApi = new TasksApi(undefined, undefined, customAxios);
+        await tasksApi.tasksDelete(taskId.toString());
+        // Notify parent component of deletion
+        onTaskCreated({ id: taskId } as Task);
+      } catch (error) {
+        console.error("Error deleting task:", error);
+      }
+    }
+  };
+
+  const handleTaskUpdated = (updatedTask: Task) => {
+    onTaskCreated(updatedTask);
+  };
+
+  const handleTaskMouseEnter = (taskId: number) => {
+    setHoveredTaskId(taskId);
+  };
+
+  const handleTaskMouseLeave = () => {
+    setHoveredTaskId(null);
   };
 
   return (
@@ -205,6 +241,7 @@ export default function WeekView({
             const backgroundColor = getCategoryColor(task.category);
             const dayWidth = 100 / 7;
             const minuteHeight = 100 / 1440;
+            const showDelete = hoveredTaskId === task.id;
 
             return (
               <div
@@ -218,7 +255,9 @@ export default function WeekView({
                   backgroundColor,
                   zIndex: 10,
                 }}
-                title={`${task.title}${task.description ? ` - ${task.description}` : ""}`}
+                onClick={() => handleTaskClick(task)}
+                onMouseEnter={() => handleTaskMouseEnter(task.id!)}
+                onMouseLeave={handleTaskMouseLeave}
               >
                 <div className="font-medium truncate">{task.title}</div>
                 {task.start_time && task.end_time && (
@@ -226,13 +265,27 @@ export default function WeekView({
                     {formatTimeString(task.start_time)} - {formatTimeString(task.end_time)}
                   </div>
                 )}
+                {showDelete && (
+                  <button
+                    className="absolute top-0 right-0 -mt-1 -mr-1 bg-white/20 rounded-full p-0.5 hover:bg-white/30"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleTaskDelete(task.id!);
+                    }}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
               </div>
             );
           })}
         </div>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={(open) => {
+        setIsDialogOpen(open);
+        if (!open) setNewTaskInfo(null);
+      }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Task</DialogTitle>
@@ -241,11 +294,29 @@ export default function WeekView({
             initialDate={newTaskInfo?.date}
             initialHour={newTaskInfo?.hour}
             categories={categories}
-            onSuccess={onTaskCreated}
-            onCancel={() => setIsDialogOpen(false)}
+            onSuccess={(task) => {
+              onTaskCreated(task);
+              setIsDialogOpen(false);
+              setNewTaskInfo(null);
+            }}
+            onCancel={() => {
+              setIsDialogOpen(false);
+              setNewTaskInfo(null);
+            }}
           />
         </DialogContent>
       </Dialog>
+
+      {selectedTask && (
+        <TaskDetailsDialog
+          task={selectedTask}
+          categories={categories}
+          isOpen={isDetailsDialogOpen}
+          onClose={() => setIsDetailsDialogOpen(false)}
+          onTaskUpdated={handleTaskUpdated}
+          onTaskDeleted={handleTaskDelete}
+        />
+      )}
     </div>
   );
 }

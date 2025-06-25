@@ -29,6 +29,8 @@ import type { Task } from '../models';
 import type { TasksExtractTaskDetailsCreate200Response } from '../models';
 // @ts-ignore
 import type { TasksExtractTaskDetailsCreateRequest } from '../models';
+// @ts-ignore
+import type { TasksStatsList200Response } from '../models';
 /**
  * TasksApi - axios parameter creator
  * @export
@@ -521,7 +523,7 @@ export const TasksApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * 
+         * Get task statistics for the authenticated user
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
@@ -762,11 +764,11 @@ export const TasksApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
-         * 
+         * Get task statistics for the authenticated user
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async tasksStatsList(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+        async tasksStatsList(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TasksStatsList200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.tasksStatsList(options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TasksApi.tasksStatsList']?.[localVarOperationServerIndex]?.url;
@@ -914,11 +916,11 @@ export const TasksApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.tasksRead(id, options).then((request) => request(axios, basePath));
         },
         /**
-         * 
+         * Get task statistics for the authenticated user
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        tasksStatsList(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+        tasksStatsList(options?: RawAxiosRequestConfig): AxiosPromise<TasksStatsList200Response> {
             return localVarFp.tasksStatsList(options).then((request) => request(axios, basePath));
         },
         /**
@@ -1086,7 +1088,7 @@ export class TasksApi extends BaseAPI {
     }
 
     /**
-     * 
+     * Get task statistics for the authenticated user
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TasksApi

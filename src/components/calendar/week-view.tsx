@@ -1,3 +1,4 @@
+// src/components/calendar/week-view.tsx
 import React, { useRef, useEffect, useState } from "react";
 import {
   format,
@@ -22,8 +23,7 @@ import TaskForm from "./task-form";
 import { Task } from "@/api/models/task";
 import { Category } from "@/api/models/category";
 import { TaskDetailsDialog } from "./task-details-dialog";
-import customAxios from "@/lib/customAxios";
-import { TasksApi } from "@/api/apis/tasks-api";
+import { useDeleteTask } from "@/hooks/useTasks";
 
 interface WeekViewProps {
   currentDate: Date;
@@ -32,6 +32,19 @@ interface WeekViewProps {
   categories: Category[];
   onTaskCreated: (task: Task) => void;
 }
+
+const formatTaskTime = (timeString: string | null | undefined) => {
+  if (!timeString) return "";
+  try {
+    const tempDate = new Date(`2000-01-01T${timeString}`);
+    if (isValid(tempDate)) {
+      return format(tempDate, "HH:mm") + " ";
+    }
+  } catch (e) {
+    console.error("Error formatting time:", timeString);
+  }
+  return "";
+};
 
 export default function WeekView({
   currentDate,
@@ -47,6 +60,8 @@ export default function WeekView({
   const [hoveredTaskId, setHoveredTaskId] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isMobile, setIsMobile] = useState(false);
+
+  const deleteTaskMutation = useDeleteTask();
 
   useEffect(() => {
     const updateSize = () => {
@@ -83,11 +98,6 @@ export default function WeekView({
       return false;
     }
   });
-
-  const formatTimeString = (timeString: string | null | undefined) => {
-    if (!timeString) return "";
-    return timeString.substring(0, 5);
-  };
 
   const getTaskStyle = (task: Task) => {
     if (!task.due_date || !task.start_time || !task.end_time) return null;
@@ -130,10 +140,7 @@ export default function WeekView({
   const handleTaskDelete = async (taskId: number) => {
     if (confirm("Delete this task permanently?")) {
       try {
-        const tasksApi = new TasksApi(undefined, undefined, customAxios);
-        await tasksApi.tasksDelete(taskId.toString());
-        // Notify parent component of deletion
-        onTaskCreated({ id: taskId } as Task);
+        await deleteTaskMutation.mutateAsync(taskId);
       } catch (error) {
         console.error("Error deleting task:", error);
       }
@@ -242,11 +249,16 @@ export default function WeekView({
             const dayWidth = 100 / 7;
             const minuteHeight = 100 / 1440;
             const showDelete = hoveredTaskId === task.id;
+            const isDeleting = deleteTaskMutation.isPending && 
+              deleteTaskMutation.variables === task.id;
 
             return (
               <div
                 key={task.id}
-                className="absolute rounded-md px-2 py-1 text-xs text-white overflow-hidden cursor-pointer shadow-md hover:ring-2 hover:ring-offset-1 hover:ring-primary transition-all duration-150 pointer-events-auto"
+                className={cn(
+                  "absolute rounded-md px-2 py-1 text-xs text-white overflow-hidden cursor-pointer shadow-md hover:ring-2 hover:ring-offset-1 hover:ring-primary transition-all duration-150 pointer-events-auto",
+                  isDeleting && "opacity-50 cursor-not-allowed"
+                )}
                 style={{
                   left: `${style.dayIndex * dayWidth}%`,
                   top: `${style.startMinutes * minuteHeight}%`,
@@ -255,17 +267,19 @@ export default function WeekView({
                   backgroundColor,
                   zIndex: 10,
                 }}
-                onClick={() => handleTaskClick(task)}
-                onMouseEnter={() => handleTaskMouseEnter(task.id!)}
+                onClick={() => !isDeleting && handleTaskClick(task)}
+                onMouseEnter={() => !isDeleting && handleTaskMouseEnter(task.id!)}
                 onMouseLeave={handleTaskMouseLeave}
               >
-                <div className="font-medium truncate">{task.title}</div>
+                <div className="font-medium truncate">
+                  {formatTaskTime(task.start_time)}{task.title}
+                </div>
                 {task.start_time && task.end_time && (
                   <div className="text-white/80 text-[10px] truncate">
-                    {formatTimeString(task.start_time)} - {formatTimeString(task.end_time)}
+                    {formatTaskTime(task.start_time)}- {formatTaskTime(task.end_time)}
                   </div>
                 )}
-                {showDelete && (
+                {showDelete && !isDeleting && (
                   <button
                     className="absolute top-0 right-0 -mt-1 -mr-1 bg-white/20 rounded-full p-0.5 hover:bg-white/30"
                     onClick={(e) => {

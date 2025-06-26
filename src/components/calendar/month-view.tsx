@@ -1,3 +1,4 @@
+// src/components/calendar/month-view.tsx
 import { useState, useEffect } from "react";
 import {
   format,
@@ -17,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -25,8 +27,7 @@ import TaskForm from "./task-form";
 import { Task } from "@/api/models/task";
 import { Category } from "@/api/models/category";
 import { TaskDetailsDialog } from "./task-details-dialog";
-import customAxios from "@/lib/customAxios";
-import { TasksApi } from "@/api/apis/tasks-api";
+import { useDeleteTask } from "@/hooks/useTasks";
 
 interface MonthViewProps {
   currentDate: Date;
@@ -43,27 +44,33 @@ interface TaskPillProps {
   category: Category | undefined;
   onTaskClick: (task: Task) => void;
   onTaskDelete: (taskId: number) => void;
+  isDeleting?: boolean;
 }
 
-const TaskPill = ({ task, category, onTaskClick, onTaskDelete }: TaskPillProps) => {
+const TaskPill = ({ task, category, onTaskClick, onTaskDelete, isDeleting }: TaskPillProps) => {
   const [showDeleteButton, setShowDeleteButton] = useState(false);
 
   return (
     <div
-      className="text-xs px-2 py-1 rounded truncate text-white relative group cursor-pointer"
+      className={cn(
+        "text-xs px-2 py-1 rounded truncate text-white relative group cursor-pointer transition-opacity",
+        isDeleting && "opacity-50 cursor-not-allowed"
+      )}
       style={{ backgroundColor: category?.color || "#CCCCCC" }}
       title={task.title}
       onClick={(e) => {
         e.stopPropagation();
-        onTaskClick(task);
+        if (!isDeleting) {
+          onTaskClick(task);
+        }
       }}
-      onMouseEnter={() => setShowDeleteButton(true)}
+      onMouseEnter={() => !isDeleting && setShowDeleteButton(true)}
       onMouseLeave={() => setShowDeleteButton(false)}
     >
       {formatTaskTime(task.start_time)}
       {task.title}
       
-      {showDeleteButton && (
+      {showDeleteButton && !isDeleting && (
         <button
           className="absolute top-0 right-0 -mt-1 -mr-1 bg-white/20 rounded-full p-0.5 hover:bg-white/30"
           onClick={(e) => {
@@ -104,6 +111,9 @@ export default function MonthView({
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
+
+  // Use the delete mutation hook
+  const deleteTaskMutation = useDeleteTask();
 
   // Debugging useEffect
   useEffect(() => {
@@ -158,12 +168,12 @@ export default function MonthView({
   const handleTaskDelete = async (taskId: number) => {
     if (confirm("Delete this task permanently?")) {
       try {
-        const tasksApi = new TasksApi(undefined, undefined, customAxios);
-        await tasksApi.tasksDelete(taskId.toString());
-        // Notify parent component of deletion
-        onTaskCreated({ id: taskId } as Task);
+        await deleteTaskMutation.mutateAsync(taskId);
+        // The mutation will automatically invalidate and refetch the tasks
+        // No need to manually call onTaskCreated for deletions
       } catch (error) {
         console.error("Error deleting task:", error);
+        // You might want to show a toast notification here
       }
     }
   };
@@ -234,6 +244,9 @@ export default function MonthView({
                 <div className="mt-0 space-y-1 max-h-[80px] overflow-y-auto">
                   {dayTasks.map((task) => {
                     const category = categories.find((c) => c.id === task.category);
+                    const isDeleting = deleteTaskMutation.isPending && 
+                      deleteTaskMutation.variables === task.id;
+                    
                     return (
                       <TaskPill
                         key={task.id}
@@ -241,6 +254,7 @@ export default function MonthView({
                         category={category}
                         onTaskClick={handleTaskClick}
                         onTaskDelete={handleTaskDelete}
+                        isDeleting={isDeleting}
                       />
                     );
                   })}
@@ -255,6 +269,7 @@ export default function MonthView({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Add New Task</DialogTitle>
+            <DialogDescription>add new task</DialogDescription>
           </DialogHeader>
           <TaskForm
             initialDate={newTaskDate}

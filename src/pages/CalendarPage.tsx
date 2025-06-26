@@ -1,4 +1,4 @@
-import customAxios from "../lib/customAxios";
+// src/pages/CalendarPage.tsx
 import { useState, useEffect } from "react";
 import {
   format,
@@ -17,39 +17,37 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import CalendarSidebar from "@/components/calendar/calendar-sidebar";
 import MonthView from "@/components/calendar/month-view";
 import WeekView from "@/components/calendar/week-view";
-import { TasksApi } from "@/api/apis/tasks-api";
 import { Task } from "@/api/models/task";
-import { Category } from "@/api/models/category";
+import { useTasks } from "@/hooks/useTasks";
+import { useCategories } from "@/hooks/useCategories";
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<number[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"month" | "week">("month");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const tasksApi = new TasksApi(undefined, undefined, customAxios);
-        const [categoriesRes, tasksRes] = await Promise.all([
-          tasksApi.tasksCategoriesList(),
-          tasksApi.tasksList(),
-        ]);
-        setCategories(categoriesRes.data);
-        setSelectedCategories(categoriesRes.data.map((c) => c.id!));
-        setTasks(tasksRes.data);
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Use the custom hooks
+  const { 
+    data: tasks = [], 
+    isLoading: tasksLoading, 
+    error: tasksError,
+    refetch: refetchTasks 
+  } = useTasks();
 
-    fetchData();
-  }, []);
+  const { 
+    data: categories = [], 
+    isLoading: categoriesLoading, 
+    error: categoriesError,
+    refetch: refetchCategories 
+  } = useCategories();
+
+  // Set default selected categories when categories are loaded
+  useEffect(() => {
+    if (categories.length > 0 && selectedCategories.length === 0) {
+      setSelectedCategories(categories.map(c => c.id!));
+    }
+  }, [categories]);
 
   const handlePreviousMonth = () => {
     setCurrentDate((prev) => subMonths(prev, 1));
@@ -80,23 +78,11 @@ export default function CalendarPage() {
   };
 
   const handleTaskCreated = (task: Task) => {
-    setTasks((prevTasks) => {
-      // Handle deletion case (task object with only id)
-      if (Object.keys(task).length === 1 && task.id) {
-        return prevTasks.filter(t => t.id !== task.id);
-      }
-      
-      // Check if task exists (update case)
-      const existingIndex = prevTasks.findIndex(t => t.id === task.id);
-      if (existingIndex >= 0) {
-        const newTasks = [...prevTasks];
-        newTasks[existingIndex] = task;
-        return newTasks;
-      }
-      
-      // Handle creation case
-      return [...prevTasks, task];
-    });
+    if (Object.keys(task).length === 1 && task.id) {
+      refetchTasks();
+      return;
+    }
+    refetchTasks();
   };
 
   const formatWeekRange = (date: Date) => {
@@ -105,13 +91,45 @@ export default function CalendarPage() {
     return `${format(start, "MMM d")} – ${format(end, "MMM d, yyyy")}`;
   };
 
-  if (loading) {
-    return <div>Loading...</div>;
+  // Show loading state
+  const isLoading = tasksLoading || categoriesLoading;
+  
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+          <p className="text-muted-foreground">Loading calendar...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (tasksError || categoriesError) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-center">
+          <p className="text-destructive mb-2">
+            {tasksError ? "Error loading tasks" : "Error loading categories"}
+          </p>
+          <Button 
+            onClick={() => {
+              if (tasksError) refetchTasks();
+              if (categoriesError) refetchCategories();
+            }} 
+            variant="outline"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="flex flex-col lg:h-[calc(100vh-4rem)] h-auto">
-      <div className="flex-none ">
+      <div className="flex-none">
         <h1 className="text-xl sm:text-2xl font-bold">Calendar</h1>
         <p className="text-sm sm:text-base text-muted-foreground">Manage your schedule and tasks</p>
       </div>

@@ -78,7 +78,7 @@ const TaskPill = ({ task, category, onTaskClick, onTaskDelete, isDeleting }: Tas
             onTaskDelete(task.id!);
           }}
         >
-          <X className="h-3 w-3" />
+          <X className="h-3 w-3 mr-1 mt-1" />
         </button>
       )}
     </div>

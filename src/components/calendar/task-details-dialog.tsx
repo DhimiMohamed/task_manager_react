@@ -1,3 +1,4 @@
+// src\components\calendar\task-details-dialog.tsx
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -128,7 +129,7 @@ const formatReminderTimeUTC = (reminderTime: string) => {
           </DialogHeader>
           <TaskForm
             taskToEdit={task}
-            existingReminders={reminders}
+            taskId={task.id}
             categories={categories}
             onSuccess={(updatedTask) => {
               onTaskUpdated(updatedTask);
@@ -176,23 +177,42 @@ const formatReminderTimeUTC = (reminderTime: string) => {
             </div>
           </div>
 
-          {/* Category */}
-          {task.category && (
-            <div>
-              <p className="text-xs text-muted-foreground font-medium">Category</p>
-              <div className="flex items-center gap-2 mt-1">
-                <span 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ 
-                    backgroundColor: categories.find(c => c.id === task.category)?.color || "#CCCCCC"
-                  }}
-                />
-                <p className="text-sm">
-                  {categories.find(c => c.id === task.category)?.name || "Unknown"}
-                </p>
-              </div>
-            </div>
-          )}
+          {/* Category and Priority */}
+<div className="grid grid-cols-2 gap-4">
+  {task.category && (
+    <div>
+      <p className="text-xs text-muted-foreground font-medium">Category</p>
+      <div className="flex items-center gap-2 mt-1">
+        <span 
+          className="w-3 h-3 rounded-full" 
+          style={{ 
+            backgroundColor: categories.find(c => c.id === task.category)?.color || "#CCCCCC"
+          }}
+        />
+        <p className="text-sm">
+          {categories.find(c => c.id === task.category)?.name || "Unknown"}
+        </p>
+      </div>
+    </div>
+  )}
+  <div>
+    <p className="text-xs text-muted-foreground font-medium">Priority</p>
+    <div className="flex items-center gap-2 mt-1">
+      <Badge 
+        variant={
+          task.priority === 3 ? 'destructive' : 
+          task.priority === 2 ? 'secondary' : 
+          'default'
+        }
+        className="text-xs"
+      >
+        {task.priority === 3 ? 'High' : 
+         task.priority === 2 ? 'Medium' : 
+         'Low'}
+      </Badge>
+    </div>
+  </div>
+</div>
 
           {/* Reminders Section */}
           <div className="space-y-3">

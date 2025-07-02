@@ -1,9 +1,10 @@
+// src\components\task-list.tsx
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Edit, Trash2, Clock } from "lucide-react";
+import { Edit, Trash2, Clock, Bell } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -22,6 +23,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useTasks } from "@/hooks/useTasks";
 import { useDeleteTask, useUpdateTask } from "@/hooks/useTasks";
+import { useRemindersByTask } from "@/hooks/useReminders";
 import { Task, TaskStatusEnum } from "@/api/models/task";
 import { Category } from "@/api/models/category";
 
@@ -146,75 +148,19 @@ export default function TaskList({ filter = "all", categories }: TaskListProps) 
   return (
     <div className="space-y-4">
       {filteredTasks.length > 0 ? (
-        filteredTasks.map((task) => {
-          const category = getCategoryById(task.category);
-          const isCompleted = task.status === TaskStatusEnum.Completed;
-
-          return (
-            <div
-              key={task.id}
-              className={cn(
-                "flex flex-col space-y-2 p-4 rounded-lg border transition-colors",
-                isCompleted
-                  ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
-                  : "hover:bg-gray-50 dark:hover:bg-gray-800/50 border-gray-200 dark:border-gray-700",
-              )}
-            >
-              <div className="flex items-start space-x-4">
-                <Checkbox
-                  checked={isCompleted}
-                  onCheckedChange={() => toggleTaskCompletion(task)}
-                  className="mt-1"
-                />
-                <div className="flex-1 space-y-1">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                    <p className={cn("font-medium", isCompleted && "line-through text-gray-500 dark:text-gray-400")}>
-                      {task.title}
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {category && (
-                        <Badge variant="outline" style={{ backgroundColor: category.color || undefined }}>
-                          {category.name}
-                        </Badge>
-                      )}
-                      {task.priority && (
-                        <Badge variant="outline" className={cn(getPriorityColor(task.priority))}>
-                          Priority: {task.priority}
-                        </Badge>
-                      )}
-                    </div>
-                  </div>
-                  {task.description && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{task.description}</p>
-                  )}
-                  {(task.due_date || task.start_time) && (
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 pt-1">
-                      <Clock className="h-4 w-4 mr-1" />
-                      {formatDate(task.due_date)}
-                      {task.start_time && ` • ${task.start_time}`}
-                      {task.end_time && ` - ${task.end_time}`}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-end space-x-2 pt-2">
-                <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => handleEditTask(task)}>
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Edit</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-8 px-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
-                  onClick={() => task.id && deleteTask(task.id)}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete</span>
-                </Button>
-              </div>
-            </div>
-          );
-        })
+        filteredTasks.map((task) => (
+          <TaskItem
+            key={task.id}
+            task={task}
+            categories={categories}
+            onToggleCompletion={toggleTaskCompletion}
+            onEdit={handleEditTask}
+            onDelete={deleteTask}
+            formatDate={formatDate}
+            getCategoryById={getCategoryById}
+            getPriorityColor={getPriorityColor}
+          />
+        ))
       ) : (
         <div className="text-center py-10 text-gray-500 dark:text-gray-400">No tasks found.</div>
       )}
@@ -340,6 +286,184 @@ export default function TaskList({ filter = "all", categories }: TaskListProps) 
           </DialogContent>
         </Dialog>
       )}
+    </div>
+  );
+}
+
+// Separate TaskItem component to handle reminders
+interface TaskItemProps {
+  task: Task;
+  categories: Category[];
+  onToggleCompletion: (task: Task) => void;
+  onEdit: (task: Task) => void;
+  onDelete: (id: number) => void;
+  formatDate: (dateString?: string | null) => string;
+  getCategoryById: (id: number | null) => Category | undefined;
+  getPriorityColor: (priority?: number) => string;
+}
+
+function TaskItem({
+  task,
+  onToggleCompletion,
+  onEdit,
+  onDelete,
+  formatDate,
+  getCategoryById,
+  getPriorityColor
+}: TaskItemProps) {
+  const { data: reminders = [] } = useRemindersByTask(task.id!);
+  const category = getCategoryById(task.category);
+  const isCompleted = task.status === TaskStatusEnum.Completed;
+
+  const getReminderDisplayText = (reminder: any) => {
+    if (!task.due_date || !task.start_time) {
+      return new Date(reminder.reminder_time!).toLocaleString();
+    }
+
+    const [year, month, day] = task.due_date.split('-').map(Number);
+    const [hours, minutes] = task.start_time.split(':').map(Number);
+
+    const taskTime = new Date(Date.UTC(year, month - 1, day, hours, minutes));
+    const reminderTime = new Date(reminder.reminder_time!);
+
+    const timeDiff = taskTime.getTime() - reminderTime.getTime();
+    const diffInMinutes = Math.floor(Math.abs(timeDiff) / (1000 * 60));
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    const isBefore = timeDiff > 0;
+
+    if (isBefore) {
+      if (diffInMinutes === 10) return "10 min before";
+      if (diffInMinutes === 30) return "30 min before";
+      if (diffInHours === 1) return "1 hour before";
+      if (diffInHours === 2) return "2 hours before";
+      if (diffInDays === 1) return "1 day before";
+    }
+
+    const labelPrefix = isBefore ? "before" : "after";
+
+    if (diffInDays > 0) {
+      return `${diffInDays}d ${labelPrefix}`;
+    } else if (diffInHours > 0) {
+      const remainingMinutes = diffInMinutes % 60;
+      if (remainingMinutes === 0) {
+        return `${diffInHours}h ${labelPrefix}`;
+      } else {
+        return `${diffInHours}h ${remainingMinutes}m ${labelPrefix}`;
+      }
+    } else if (diffInMinutes > 0) {
+      return `${diffInMinutes}m ${labelPrefix}`;
+    } else {
+      return "At task time";
+    }
+  };
+
+  const getReminderStatus = (reminder: any) => {
+    if (reminder.email_status === 'sent' || reminder.in_app_status === 'sent') {
+      return { label: 'Sent', variant: 'secondary' as const };
+    }
+    if (reminder.email_status === 'pending' || reminder.in_app_status === 'pending') {
+      return { label: 'Pending', variant: 'default' as const };
+    }
+    return { label: 'Failed', variant: 'destructive' as const };
+  };
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col space-y-2 p-4 rounded-lg border transition-colors",
+        isCompleted
+          ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-700"
+          : "hover:bg-gray-50 dark:hover:bg-gray-800/50 border-gray-200 dark:border-gray-700",
+      )}
+    >
+      <div className="flex items-start space-x-4">
+        <Checkbox
+          checked={isCompleted}
+          onCheckedChange={() => onToggleCompletion(task)}
+          className="mt-1"
+        />
+        <div className="flex-1 space-y-1">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <p className={cn("font-medium", isCompleted && "line-through text-gray-500 dark:text-gray-400")}>
+              {task.title}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {category && (
+                <Badge variant="outline" style={{ backgroundColor: category.color || undefined }}>
+                  {category.name}
+                </Badge>
+              )}
+              {task.priority && (
+                <Badge variant="outline" className={cn(getPriorityColor(task.priority))}>
+                  Priority: {task.priority}
+                </Badge>
+              )}
+            </div>
+          </div>
+          {task.description && (
+            <p className="text-sm text-gray-500 dark:text-gray-400">{task.description}</p>
+          )}
+          {(task.due_date || task.start_time) && (
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 pt-1">
+              <Clock className="h-4 w-4 mr-1" />
+              {formatDate(task.due_date)}
+              {task.start_time && ` • ${task.start_time}`}
+              {task.end_time && ` - ${task.end_time}`}
+            </div>
+          )}
+          
+          {/* Reminders Section */}
+          {reminders.length > 0 && (
+            <div className="pt-2">
+              <div className="flex items-center gap-2 mb-2">
+                <Bell className="h-3 w-3 text-gray-400" />
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                  Reminders ({reminders.length})
+                </span>
+              </div>
+              <div className="space-y-1 ml-5">
+                {reminders.slice(0, 3).map((reminder) => {
+                  const status = getReminderStatus(reminder);
+                  const displayText = getReminderDisplayText(reminder);
+                  return (
+                    <div
+                      key={reminder.id}
+                      className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400"
+                    >
+                      <span>{displayText}</span>
+                      <Badge variant={status.variant} className="text-xs px-1 py-0">
+                        {status.label}
+                      </Badge>
+                    </div>
+                  );
+                })}
+                {reminders.length > 3 && (
+                  <div className="text-xs text-gray-400 italic">
+                    +{reminders.length - 3} more reminder{reminders.length - 3 > 1 ? 's' : ''}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex justify-end space-x-2 pt-2">
+        <Button variant="outline" size="sm" className="h-8 px-2" onClick={() => onEdit(task)}>
+          <Edit className="h-4 w-4" />
+          <span className="sr-only">Edit</span>
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8 px-2 text-red-500 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300"
+          onClick={() => task.id && onDelete(task.id)}
+        >
+          <Trash2 className="h-4 w-4" />
+          <span className="sr-only">Delete</span>
+        </Button>
+      </div>
     </div>
   );
 }

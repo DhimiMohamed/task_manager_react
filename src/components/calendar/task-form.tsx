@@ -1,4 +1,4 @@
-import customAxios from "../../lib/customAxios"
+// src/components/calendar/task-form.tsx
 import { useState, useEffect } from "react"
 import { format, subMinutes, subHours, subDays } from "date-fns"
 import { CalendarIcon, Trash2, Clock, Settings } from "lucide-react"
@@ -11,11 +11,11 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { cn } from "@/lib/utils"
-import { TasksApi } from "@/api/apis/tasks-api"
-import { RemindersApi } from "@/api/apis/reminders-api"
 import { Task, TaskStatusEnum } from "@/api/models/task"
 import { Reminder, ReminderEmailStatusEnum, ReminderInAppStatusEnum } from "@/api/models/reminder"
 import { Category } from "@/api/models/category"
+import { useCreateTask, useUpdateTask } from "@/hooks/useTasks"
+import { useRemindersByTask, useCreateReminder, useDeleteReminder, useUpdateReminder } from "@/hooks/useReminders"
 
 interface ReminderInput {
   id: string;
@@ -40,7 +40,7 @@ interface TaskFormProps {
   onSuccess?: (newTask: Task) => void
   onCancel?: () => void
   taskToEdit?: Task
-  existingReminders?: Reminder[]
+  taskId?: number
 }
 
 export default function TaskForm({ 
@@ -50,7 +50,7 @@ export default function TaskForm({
   onSuccess, 
   onCancel,
   taskToEdit,
-  existingReminders = []
+  taskId
 }: TaskFormProps) {
   const [date, setDate] = useState<Date | undefined>(
     taskToEdit?.due_date ? new Date(taskToEdit.due_date) : initialDate || new Date()
@@ -64,14 +64,24 @@ export default function TaskForm({
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>(
     taskToEdit?.category?.toString() || (categories.length > 0 ? categories[0].id?.toString() || "" : "")
   );
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Reminders state
+  const [priority, setPriority] = useState<number>(taskToEdit?.priority || 1);
   const [reminders, setReminders] = useState<ReminderInput[]>([]);
   const [showPresetSelector, setShowPresetSelector] = useState(false);
   const [showCustomCalendar, setShowCustomCalendar] = useState<string | null>(null);
 
-  // Helper function to get current task datetime
+  // Use task hooks
+  const createTaskMutation = useCreateTask();
+  const updateTaskMutation = useUpdateTask();
+
+  // Use reminders hook
+  const { data: existingReminders = [] } = useRemindersByTask(taskId || taskToEdit?.id!);
+  const createReminder = useCreateReminder();
+  const deleteReminder = useDeleteReminder();
+  const updateReminderMutation = useUpdateReminder();
+
+  // Check if any mutation is loading
+  const isSubmitting = createTaskMutation.isPending || updateTaskMutation.isPending;
+
   const getCurrentTaskDateTime = (): Date => {
     if (!date) return new Date();
     const [hours, minutes] = startTime.split(':').map(Number);
@@ -80,25 +90,30 @@ export default function TaskForm({
     return taskDateTime;
   };
 
+  const adjustForTimezone = (utcDateString: string): Date => {
+    const date = new Date(utcDateString);
+    const timezoneOffset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() + timezoneOffset);
+  };
+
   useEffect(() => {
     if (taskToEdit && existingReminders.length > 0) {
       const initialReminders = existingReminders.map(reminder => {
-        const reminderTime = new Date(reminder.reminder_time!);
+        const reminderTime = adjustForTimezone(reminder.reminder_time!);
         const taskTime = new Date(taskToEdit.due_date!);
         taskTime.setHours(
           parseInt(taskToEdit.start_time?.split(':')[0] || '0'),
           parseInt(taskToEdit.start_time?.split(':')[1] || '0')
         );
 
-        // Check if this matches any of our presets
         const timeDiff = taskTime.getTime() - reminderTime.getTime();
         let presetMatch = null;
 
-        if (timeDiff === 10 * 60 * 1000) presetMatch = '10min';
-        else if (timeDiff === 30 * 60 * 1000) presetMatch = '30min';
-        else if (timeDiff === 60 * 60 * 1000) presetMatch = '1hour';
-        else if (timeDiff === 2 * 60 * 60 * 1000) presetMatch = '2hours';
-        else if (timeDiff === 24 * 60 * 60 * 1000) presetMatch = '1day';
+        if (Math.abs(timeDiff - (10 * 60 * 1000)) < 60000) presetMatch = '10min';
+        else if (Math.abs(timeDiff - (30 * 60 * 1000)) < 60000) presetMatch = '30min';
+        else if (Math.abs(timeDiff - (60 * 60 * 1000)) < 60000) presetMatch = '1hour';
+        else if (Math.abs(timeDiff - (2 * 60 * 60 * 1000)) < 60000) presetMatch = '2hours';
+        else if (Math.abs(timeDiff - (24 * 60 * 60 * 1000)) < 60000) presetMatch = '1day';
 
         if (presetMatch) {
           return {
@@ -132,13 +147,11 @@ export default function TaskForm({
   };
 
   const addCustomReminder = () => {
-    // Set custom reminder to task's due date and start time by default
     const taskDateTime = getCurrentTaskDateTime();
-    
     const newReminder: ReminderInput = {
       id: Date.now().toString(),
       type: 'custom',
-      customDateTime: taskDateTime // Use task's date and time as default
+      customDateTime: taskDateTime
     };
     setReminders([...reminders, newReminder]);
   };
@@ -147,12 +160,9 @@ export default function TaskForm({
     setReminders(reminders.map(reminder => {
       if (reminder.id === id) {
         const updatedReminder = { ...reminder, ...updates };
-        
-        // If switching to custom type and no customDateTime exists, set to task time
         if (updates.type === 'custom' && !updatedReminder.customDateTime) {
           updatedReminder.customDateTime = getCurrentTaskDateTime();
         }
-        
         return updatedReminder;
       }
       return reminder;
@@ -169,9 +179,7 @@ export default function TaskForm({
     taskDateTime.setHours(hours, minutes, 0, 0);
 
     if (reminderInput.type === 'custom' && reminderInput.customDateTime) {
-      // Create a new date to avoid mutation
       const customTime = new Date(reminderInput.customDateTime);
-      // Ensure the custom time is properly formatted with seconds
       customTime.setSeconds(0, 0);
       return customTime;
     }
@@ -195,12 +203,9 @@ export default function TaskForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Prevent submission if clicking on calendar elements
     if ((e.target as HTMLElement).closest('.calendar-container')) {
       return;
     }
-    
-    setIsSubmitting(true);
     
     const toastId = toast.loading(taskToEdit ? "Updating task..." : "Creating task...");
     
@@ -215,36 +220,40 @@ export default function TaskForm({
         start_time: startTime,
         end_time: endTime,
         status: taskToEdit?.status || TaskStatusEnum.Pending,
-        priority: taskToEdit?.priority || 1,
+        priority: priority,
         category: selectedCategoryId ? parseInt(selectedCategoryId) : null,
       };
 
-      const tasksApi = new TasksApi(undefined, undefined, customAxios);
-      const remindersApi = new RemindersApi(undefined, undefined, customAxios);
+      let createdOrUpdatedTask: Task;
       
-      let response;
       if (taskToEdit) {
-        response = await tasksApi.tasksUpdate(taskToEdit.id!.toString(), taskData);
+        // Update existing task
+        const response = await updateTaskMutation.mutateAsync({
+          ...taskData,
+          id: taskToEdit.id!
+        });
+        createdOrUpdatedTask = response.data;
         
-        // First, delete any existing reminders that were removed
+        // Handle existing reminders - delete ones that are no longer needed
         const existingIds = existingReminders.map(r => r.id!);
         const remainingIds = reminders
           .filter(r => r.existingId)
           .map(r => r.existingId!);
         
         const toDelete = existingIds.filter(id => !remainingIds.includes(id));
-        await Promise.all(toDelete.map(id => remindersApi.remindersRemindersDelete(id.toString())));
+        await Promise.all(toDelete.map(id => deleteReminder.mutateAsync(id)));
       } else {
-        response = await tasksApi.tasksCreate(taskData);
+        // Create new task
+        const response = await createTaskMutation.mutateAsync(taskData);
+        createdOrUpdatedTask = response.data;
       }
-      const createdOrUpdatedTask = response.data;
 
-      // Create/update reminders if any exist and we have a valid task date/time
+      // Handle reminders
       if (reminders.length > 0 && date && createdOrUpdatedTask.id) {
         const reminderPromises = reminders.map(async (reminderInput) => {
           const reminderTime = calculateReminderTime(date, startTime, reminderInput);
           
-          const reminderData: Reminder = {
+          const reminderData: Omit<Reminder, 'id'> = {
             task: createdOrUpdatedTask.id!,
             reminder_time: format(reminderTime, "yyyy-MM-dd'T'HH:mm:ss"),
             email_status: ReminderEmailStatusEnum.Pending,
@@ -252,14 +261,15 @@ export default function TaskForm({
           };
 
           if (reminderInput.existingId) {
-            // Update existing reminder
-            return remindersApi.remindersRemindersUpdate(
-              reminderInput.existingId.toString(),
-              reminderData
-            );
+            return updateReminderMutation.mutateAsync({
+              id: reminderInput.existingId,
+              reminder: {
+                ...reminderData,
+                id: reminderInput.existingId
+              }
+            });
           } else {
-            // Create new reminder
-            return remindersApi.remindersRemindersCreate(reminderData);
+            return createReminder.mutateAsync(reminderData);
           }
         });
 
@@ -273,17 +283,13 @@ export default function TaskForm({
     } catch (error) {
       console.error("Error:", error);
       toast.error(taskToEdit ? "Failed to update task" : "Failed to create task", { id: toastId });
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
-  // Update custom reminder times when task date/time changes
   useEffect(() => {
     if (date && startTime) {
       setReminders(currentReminders => 
         currentReminders.map(reminder => {
-          // Don't auto-adjust custom reminders - leave them as set by user
           return reminder;
         })
       );
@@ -318,34 +324,23 @@ export default function TaskForm({
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Date *</Label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-full justify-start text-left font-normal",
-                  !date && "text-muted-foreground",
-                  isSubmitting && "opacity-50 cursor-not-allowed"
-                )}
-                disabled={isSubmitting}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {date ? format(date, "PPP") : "Select date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0 calendar-container">
-              <Calendar 
-                mode="single" 
-                selected={date} 
-                onSelect={setDate} 
-                initialFocus
-                disabled={isSubmitting}
-              />
-            </PopoverContent>
-          </Popover>
+          <Label htmlFor="priority">Priority</Label>
+          <Select 
+            value={priority.toString()}
+            onValueChange={(value) => setPriority(parseInt(value))}
+            disabled={isSubmitting}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">Low</SelectItem>
+              <SelectItem value="2">Medium</SelectItem>
+              <SelectItem value="3">High</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-
+        
         <div className="space-y-2">
           <Label htmlFor="category">Category *</Label>
           <Select 
@@ -376,6 +371,35 @@ export default function TaskForm({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Date *</Label>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !date && "text-muted-foreground",
+                isSubmitting && "opacity-50 cursor-not-allowed"
+              )}
+              disabled={isSubmitting}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {date ? format(date, "PPP") : "Select date"}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0 calendar-container">
+            <Calendar 
+              mode="single" 
+              selected={date} 
+              onSelect={setDate} 
+              initialFocus
+              disabled={isSubmitting}
+            />
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -434,14 +458,14 @@ export default function TaskForm({
                 <>
                   {/* Backdrop to close dropdown */}
                   <div 
-                    className="fixed inset-0 z-40" 
+                    className="fixed inset-0 z-[9998]" 
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowPresetSelector(false);
                     }}
                   />
                   {/* Dropdown menu */}
-                  <div className="absolute right-0 top-full mt-1 w-56 bg-white border rounded-md shadow-lg z-50 p-2 calendar-container">
+                  <div className="absolute right-0 top-full mt-1 w-56 bg-white border rounded-md shadow-lg z-[9999] p-2 calendar-container">
                     <div className="space-y-1">
                       <p className="text-xs font-medium mb-2 text-gray-700">Choose preset reminder:</p>
                       {REMINDER_PRESETS.map((preset) => (
@@ -545,14 +569,21 @@ export default function TaskForm({
                         <>
                           {/* Backdrop to close calendar */}
                           <div 
-                            className="fixed inset-0 z-40" 
+                            className="fixed inset-0 z-[9998]" 
                             onClick={(e) => {
                               e.stopPropagation();
                               setShowCustomCalendar(null);
                             }}
                           />
-                          {/* Calendar dropdown */}
-                          <div className="absolute left-0 top-full mt-1 bg-white border rounded-md shadow-lg z-50 p-0 calendar-container">
+                          {/* Calendar dropdown - positioned fixed to break out of container constraints */}
+                          <div className="fixed bg-white border rounded-md shadow-xl z-[9999] p-0 calendar-container"
+                               style={{
+                                 top: 'calc(50% - 200px)',
+                                 left: '50%',
+                                 transform: 'translateX(-50%)',
+                                 maxHeight: '400px',
+                                 width: '300px'
+                               }}>
                             <Calendar
                               mode="single"
                               selected={reminder.customDateTime}

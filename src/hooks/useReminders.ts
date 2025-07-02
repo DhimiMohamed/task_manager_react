@@ -13,7 +13,7 @@ export function useReminders() {
       const response = await remindersApi.remindersRemindersList();
       return response.data;
     },
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5,
   });
 }
 
@@ -22,6 +22,17 @@ export function useCreateReminder() {
   return useMutation({
     mutationFn: (reminder: Omit<Reminder, 'id'>) => 
       remindersApi.remindersRemindersCreate(reminder as Reminder),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reminders'] });
+    },
+  });
+}
+
+export function useUpdateReminder() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({id, reminder}: {id: number, reminder: Reminder}) => 
+      remindersApi.remindersRemindersUpdate(id.toString(), reminder),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['reminders'] });
     },
@@ -38,10 +49,11 @@ export function useDeleteReminder() {
   });
 }
 
-export function useRemindersByTask(taskId: number) {
+export function useRemindersByTask(taskId?: number) {
   return useQuery<Reminder[]>({
     queryKey: ['reminders', taskId],
     queryFn: async () => {
+      if (!taskId) return [];
       const response = await remindersApi.remindersRemindersList();
       return response.data.filter(reminder => reminder.task === taskId);
     },

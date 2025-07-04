@@ -79,7 +79,61 @@ export interface Task {
      * @type {number}
      * @memberof Task
      */
-    'category': number | null;
+    'category'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Task
+     */
+    'created_by'?: number | null;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Task
+     */
+    'is_personal'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Task
+     */
+    'project'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof Task
+     */
+    'assigned_to'?: number | null;
+    /**
+     * 
+     * @type {Set<number>}
+     * @memberof Task
+     */
+    'depends_on'?: Set<number>;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof Task
+     */
+    'is_recurring'?: boolean;
+    /**
+     * 
+     * @type {number}
+     * @memberof Task
+     */
+    'recurring_task'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Task
+     */
+    'created_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Task
+     */
+    'updated_at'?: string;
 }
 
 export const TaskStatusEnum = {

@@ -14,6 +14,8 @@ import TasksPage from './pages/TasksPage';
 import AIAssistantToggle from './components/ai-assistant-toggle';
 import NotificationsPage from './pages/NotificationsPage';
 import StatisticsPage from './pages/StatisticsPage';
+import ProjectsPage from './pages/ProjectsPage';
+import ProjectDetailPage from './pages/ProjectDetailPage';
 
 function App() {
   return (
@@ -59,6 +61,8 @@ function LayoutWithSidebar() {
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="calendar" element={<CalendarPage />} />
+          <Route path="projects" element={<ProjectsPage />} />
+          <Route path="projects/:id" element={<ProjectDetailPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           {/* <Route path="tasks" element={<Tasks />} /> */}
           <Route path="tasks" element={<TasksPage />} />

@@ -6,12 +6,26 @@ import customAxios from "../lib/customAxios";
 
 const tasksApi = new TasksApi(undefined, undefined, customAxios);
 
-export function useTasks(ordering?: string) {
+// src/hooks/useTasks.ts
+export function useTasks(ordering?: string, filters?: { projectId?: string }) {
   return useQuery<Task[]>({
     queryKey: ['tasks', ordering],
     queryFn: async () => {
       const response = await tasksApi.tasksList(ordering);
       return response.data;
+    },
+    select: (data) => {
+      let filteredData = [...data];
+      
+      // Apply project filter if provided
+      if (filters?.projectId) {
+        filteredData = filteredData.filter(task => task.project === Number(filters.projectId));
+      }
+
+      // Apply other filters if needed (status, priority, etc.)
+      // if (filters?.status) { ... }
+
+      return filteredData;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
   });

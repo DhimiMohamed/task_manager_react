@@ -312,7 +312,7 @@ function TaskItem({
   getPriorityColor
 }: TaskItemProps) {
   const { data: reminders = [] } = useRemindersByTask(task.id!);
-  const category = getCategoryById(task.category);
+  const category = getCategoryById(task.category ?? null);
   const isCompleted = task.status === TaskStatusEnum.Completed;
 
   const getReminderDisplayText = (reminder: any) => {

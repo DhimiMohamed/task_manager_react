@@ -3,8 +3,10 @@
 api.ts
 apis/accounts-api.ts
 apis/aiassistant-api.ts
+apis/projects-api.ts
 apis/reminders-api.ts
 apis/tasks-api.ts
+apis/teams-api.ts
 base.ts
 common.ts
 configuration.ts
@@ -25,9 +27,13 @@ models/ai-task-assistant400-response.ts
 models/ai-task-assistant401-response.ts
 models/ai-task-assistant500-response.ts
 models/category.ts
+models/comment.ts
+models/file-attachment.ts
 models/index.ts
 models/notification.ts
 models/profile.ts
+models/project.ts
+models/recurring-task.ts
 models/reminder.ts
 models/task.ts
 models/tasks-extract-task-details-create-request.ts
@@ -35,6 +41,8 @@ models/tasks-extract-task-details-create200-response.ts
 models/tasks-stats-list200-response-categories-inner.ts
 models/tasks-stats-list200-response-daily-tasks.ts
 models/tasks-stats-list200-response.ts
+models/team-membership.ts
+models/team.ts
 models/token-refresh.ts
 models/user-login.ts
 models/user-registration.ts

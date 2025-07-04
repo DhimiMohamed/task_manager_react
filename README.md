@@ -52,3 +52,7 @@ export default tseslint.config({
   },
 })
 ```
+
+<!-- ---------------------------------------------use openApi -->
+
+openapi-generator-cli generate -i http://localhost:8000/swagger.json -g typescript-axios -o src/api --skip-validate-spec --additional-properties="withSeparateModelsAndApi=true,apiPackage=apis,modelPackage=models"

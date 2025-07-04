@@ -17,44 +17,44 @@
 /**
  * 
  * @export
- * @interface Category
+ * @interface Comment
  */
-export interface Category {
+export interface Comment {
     /**
      * 
      * @type {number}
-     * @memberof Category
+     * @memberof Comment
      */
     'id'?: number;
     /**
      * 
-     * @type {string}
-     * @memberof Category
+     * @type {number}
+     * @memberof Comment
      */
-    'name': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof Category
-     */
-    'color'?: string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof Category
-     */
-    'is_personal'?: boolean;
+    'task'?: number;
     /**
      * 
      * @type {number}
-     * @memberof Category
+     * @memberof Comment
      */
-    'user'?: number;
+    'author'?: number;
     /**
      * 
-     * @type {number}
-     * @memberof Category
+     * @type {string}
+     * @memberof Comment
      */
-    'project': number | null;
+    'text': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Comment
+     */
+    'created_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Comment
+     */
+    'updated_at'?: string;
 }
 

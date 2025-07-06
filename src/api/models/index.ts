@@ -26,6 +26,7 @@ export * from './tasks-extract-task-details-create-request';
 export * from './tasks-stats-list200-response';
 export * from './tasks-stats-list200-response-categories-inner';
 export * from './tasks-stats-list200-response-daily-tasks';
+export * from './tasks-stats-list200-response-projects-inner';
 export * from './team';
 export * from './team-membership';
 export * from './token-refresh';

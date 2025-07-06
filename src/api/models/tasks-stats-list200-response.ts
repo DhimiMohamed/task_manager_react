@@ -19,6 +19,9 @@ import type { TasksStatsList200ResponseCategoriesInner } from './tasks-stats-lis
 // May contain unused imports in some cases
 // @ts-ignore
 import type { TasksStatsList200ResponseDailyTasks } from './tasks-stats-list200-response-daily-tasks';
+// May contain unused imports in some cases
+// @ts-ignore
+import type { TasksStatsList200ResponseProjectsInner } from './tasks-stats-list200-response-projects-inner';
 
 /**
  * 
@@ -68,6 +71,12 @@ export interface TasksStatsList200Response {
      * @memberof TasksStatsList200Response
      */
     'categories'?: Array<TasksStatsList200ResponseCategoriesInner>;
+    /**
+     * 
+     * @type {Array<TasksStatsList200ResponseProjectsInner>}
+     * @memberof TasksStatsList200Response
+     */
+    'projects'?: Array<TasksStatsList200ResponseProjectsInner>;
     /**
      * 
      * @type {number}

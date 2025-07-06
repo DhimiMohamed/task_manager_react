@@ -3,14 +3,16 @@
 import { useState, useMemo } from "react"
 import { useNavigate } from "react-router-dom"
 import { useProjects } from "@/hooks/useProjects"
+import { useStatistics } from "@/hooks/useStatistics"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useCallback } from "react"
-import { PlusCircle, Search, Calendar, AlertTriangle, Grid3X3, List } from "lucide-react"
+import { PlusCircle, Search, Calendar, AlertTriangle, Grid3X3, List, Star, Users } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format, isAfter, isBefore, addDays, parseISO } from "date-fns"
 import ProjectForm from "@/components/projects/project-form"
@@ -27,22 +29,33 @@ export interface ProjectFilters {
 
 // ...existing code...
 
-const teams = ["All Teams", "Design Team", "Development Team", "Marketing Team", "QA Team"]
+import { useTeams } from "@/hooks/useTeams"
+
+// ...existing code...
+
+// Remove static teams, use dynamic teams from backend
 const statuses = ["All Statuses", "planning", "active", "on_hold", "completed"]
 const timeframes = ["All Time", "This Week", "This Month", "Next Month", "Overdue"]
 
 const statusColors = {
-  planning: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
-  "in-progress": "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-  review: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300",
-  completed: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-  "on-hold": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300",
-}
+  planning: "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100 border-gray-300 dark:border-gray-600",
+  active: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border-blue-300 dark:border-blue-700",
+  "in-progress": "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300 border-indigo-300 dark:border-indigo-700",
+  review: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700",
+  completed: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-300 dark:border-green-700",
+  "on_hold": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-red-300 dark:border-red-700",
+  "on-hold": "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-red-300 dark:border-red-700",
+};
+
 
 export default function ProjectsPage() {
   const navigate = useNavigate();
   // Fetch projects from backend
   const { data: projects = [], isLoading, refetch } = useProjects()
+  // Fetch project statistics (for progress bar)
+  const { data: stats } = useStatistics();
+  // Fetch teams from backend
+  const { data: teamsData = [], isLoading: isTeamsLoading } = useTeams();
   const [filters, setFilters] = useState<ProjectFilters>({
     team: "All Teams",
     status: "All Statuses",
@@ -158,11 +171,18 @@ export default function ProjectsPage() {
                   <SelectValue placeholder="Team" />
                 </SelectTrigger>
                 <SelectContent>
-                  {teams.map((team) => (
-                    <SelectItem key={team} value={team}>
-                      {team}
-                    </SelectItem>
-                  ))}
+                  <SelectItem key="all-teams" value="All Teams">
+                    All Teams
+                  </SelectItem>
+                  {isTeamsLoading ? (
+                    <SelectItem disabled value="loading">Loading teams...</SelectItem>
+                  ) : (
+                    teamsData.map((team) => (
+                      <SelectItem key={team.name} value={team.name}>
+                        {team.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
 
@@ -231,7 +251,18 @@ export default function ProjectsPage() {
       {filteredProjects.length > 0 ? (
         <div className={cn(viewMode === "grid" ? "grid gap-6 md:grid-cols-2 lg:grid-cols-3" : "space-y-4")}>
           {filteredProjects.map((project) => {
-            const deadlineStatus = getDeadlineStatus(project.end_date, project.status)
+            const deadlineStatus = getDeadlineStatus(project.end_date, project.status);
+            // Find the matching stats for this project
+            const projectStats = stats?.projects?.find((p) => p.name === project.name);
+            const completionRate = projectStats?.completion_rate ?? 0;
+
+
+            // Fallbacks for UI fields not in backend
+            const isFavorite = false; // No favorite in backend
+            const teamColor = "bg-gray-400"; // No color in backend
+            const teamName = project.team_name ?? "Unknown Team";
+            const progress = completionRate;
+            const deadline = project.end_date;
 
             return (
               <Card
@@ -249,21 +280,51 @@ export default function ProjectsPage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
                         <CardTitle className="text-lg">{project.name}</CardTitle>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={(e) => e.stopPropagation()}
+                          title="Favorite (not implemented)"
+                        >
+                          <Star
+                            className={cn(
+                              "h-4 w-4",
+                              isFavorite ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground",
+                            )}
+                          />
+                        </Button>
                       </div>
                       <CardDescription className="line-clamp-2">{project.description}</CardDescription>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2 mt-2">
-                    <span className="text-sm text-muted-foreground">{project.team_name}</span>
+                    <div className={cn("w-3 h-3 rounded-full", teamColor)}></div>
+                    <span className="text-sm text-muted-foreground">{teamName}</span>
                   </div>
                 </CardHeader>
 
                 <CardContent className={cn("pt-0", viewMode === "list" && "sm:flex-1 sm:pt-6")}> 
                   <div className="space-y-3">
+                    {/* Progress */}
+                    <div className="space-y-1">
+                      <div className="flex justify-between text-sm">
+                        <span>Progress</span>
+                        <span className="font-medium">{progress}%</span>
+                      </div>
+                      <Progress value={progress} className="h-2" />
+                    </div>
+
                     {/* Status and Deadline */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <Badge variant="outline" className={cn(statusColors[project.status as keyof typeof statusColors] || "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300")}> 
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          statusColors[(project.status as keyof typeof statusColors) ?? "planning"] || "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+                          "capitalize border"
+                        )}
+                      >
                         {project.status || "unknown"}
                       </Badge>
 
@@ -277,16 +338,27 @@ export default function ProjectsPage() {
                         {deadlineStatus === "overdue" && <AlertTriangle className="h-4 w-4" />}
                         <Calendar className="h-4 w-4" />
                         <span>
-                          {project.end_date ? format(parseISO(project.end_date), "MMM d, yyyy") : "No deadline"}
+                          {deadline ? format(parseISO(deadline), "MMM d, yyyy") : "No deadline"}
                           {deadlineStatus === "overdue" && " (Overdue)"}
                           {deadlineStatus === "urgent" && " (Due Soon)"}
                         </span>
                       </div>
                     </div>
+
+                    {/* Team Members and Tasks */}
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Users className="h-4 w-4" />
+                        <span>{projectStats?.team_members_count ?? 0} members</span>
+                      </div>
+                      <span>
+                        {(projectStats?.completed ?? 0)}/{projectStats?.total ?? 0} tasks
+                      </span>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            )
+            );
           })}
         </div>
       ) : (

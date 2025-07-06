@@ -436,56 +436,32 @@ export default function TaskForm({
             <Label className="text-sm font-medium">Reminders</Label>
           </div>
           <div className="flex items-center gap-2">
-            {/* Preset Reminders Button */}
+            {/* Preset Reminders Select */}
             <div className="relative">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={isSubmitting}
-                className="flex items-center gap-1 text-xs"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  setShowPresetSelector(!showPresetSelector);
+              <Select
+                value=""
+                onValueChange={(value) => {
+                  addPresetReminder(value);
                 }}
+                disabled={isSubmitting}
+                open={showPresetSelector}
+                onOpenChange={setShowPresetSelector}
               >
-                <Clock className="h-3 w-3" />
-                Preset
-              </Button>
-              
-              {showPresetSelector && (
-                <>
-                  {/* Backdrop to close dropdown */}
-                  <div 
-                    className="fixed inset-0 z-[9998]" 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowPresetSelector(false);
-                    }}
-                  />
-                  {/* Dropdown menu */}
-                  <div className="absolute right-0 top-full mt-1 w-56 bg-white border rounded-md shadow-lg z-[9999] p-2 calendar-container">
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium mb-2 text-gray-700">Choose preset reminder:</p>
-                      {REMINDER_PRESETS.map((preset) => (
-                        <button
-                          key={preset.value}
-                          type="button"
-                          className="w-full text-left px-2 py-1 text-xs rounded hover:bg-gray-100 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            addPresetReminder(preset.value);
-                          }}
-                          disabled={isSubmitting}
-                        >
-                          {preset.label}
-                        </button>
-                      ))}
-                    </div>
+                <SelectTrigger className="flex items-center gap-1 text-xs h-8 min-w-[90px]">
+                  <Clock className="h-3 w-3" />
+                  Preset
+                </SelectTrigger>
+                <SelectContent className="calendar-container z-[9999]">
+                  <div className="space-y-1 p-2">
+                    <p className="text-xs font-medium mb-2 text-gray-700">Choose preset reminder:</p>
+                    {REMINDER_PRESETS.map((preset) => (
+                      <SelectItem key={preset.value} value={preset.value} className="text-xs">
+                        {preset.label}
+                      </SelectItem>
+                    ))}
                   </div>
-                </>
-              )}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Custom Reminder Button */}
@@ -498,7 +474,7 @@ export default function TaskForm({
                 addCustomReminder();
               }}
               disabled={isSubmitting}
-              className="flex items-center gap-1 text-xs"
+              className="flex items-center gap-1 text-xs text-muted-foreground"
             >
               <Settings className="h-3 w-3" />
               Custom
@@ -544,90 +520,71 @@ export default function TaskForm({
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    <div className="relative">
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal h-8 text-xs",
-                          !reminder.customDateTime && "text-muted-foreground"
-                        )}
-                        disabled={isSubmitting}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          e.preventDefault();
-                          setShowCustomCalendar(showCustomCalendar === reminder.id ? null : reminder.id);
-                        }}
-                      >
-                        <CalendarIcon className="mr-2 h-3 w-3" />
-                        {reminder.customDateTime 
-                          ? format(reminder.customDateTime, "MMM d, yyyy 'at' HH:mm") 
-                          : "Set reminder time"
-                        }
-                      </Button>
-                      
-                      {showCustomCalendar === reminder.id && (
-                        <>
-                          {/* Backdrop to close calendar */}
-                          <div 
-                            className="fixed inset-0 z-[9998]" 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setShowCustomCalendar(null);
+                    <Popover open={showCustomCalendar === reminder.id} onOpenChange={(open) => setShowCustomCalendar(open ? reminder.id : null)}>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal h-8 text-xs",
+                            !reminder.customDateTime && "text-muted-foreground"
+                          )}
+                          disabled={isSubmitting}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            setShowCustomCalendar(showCustomCalendar === reminder.id ? null : reminder.id);
+                          }}
+                        >
+                          <CalendarIcon className="mr-2 h-3 w-3" />
+                          {reminder.customDateTime 
+                            ? format(reminder.customDateTime, "MMM d, yyyy 'at' HH:mm") 
+                            : "Set reminder time"
+                          }
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 calendar-container pointer-events-auto z-50" >
+                        <Calendar
+                          mode="single"
+                          selected={reminder.customDateTime}
+                          onSelect={(selectedDate) => {
+                            if (selectedDate) {
+                              const currentTime = reminder.customDateTime || getCurrentTaskDateTime();
+                              const newDate = new Date(selectedDate);
+                              newDate.setHours(
+                                currentTime.getHours(),
+                                currentTime.getMinutes(),
+                                0,
+                                0
+                              );
+                              updateReminder(reminder.id, { customDateTime: newDate });
+                            }
+                          }}
+                          initialFocus
+                          disabled={isSubmitting}
+                          className="rounded-md"
+                        />
+                        <div className="p-3 border-t bg-gray-50">
+                          <Label className="text-xs font-medium">Time</Label>
+                          <Input
+                            type="time"
+                            value={
+                              reminder.customDateTime
+                                ? format(reminder.customDateTime, "HH:mm")
+                                : startTime // Use task's start time as default
+                            }
+                            onChange={(e) => {
+                              const [hours, minutes] = e.target.value.split(':').map(Number);
+                              const currentDate = reminder.customDateTime || new Date();
+                              const newDateTime = new Date(currentDate);
+                              newDateTime.setHours(hours, minutes, 0, 0);
+                              updateReminder(reminder.id, { customDateTime: newDateTime });
                             }}
+                            className="mt-1 h-8"
+                            disabled={isSubmitting}
                           />
-                          {/* Calendar dropdown - positioned fixed to break out of container constraints */}
-                          <div className="fixed bg-white border rounded-md shadow-xl z-[9999] p-0 calendar-container"
-                               style={{
-                                 top: 'calc(50% - 200px)',
-                                 left: '50%',
-                                 transform: 'translateX(-50%)',
-                                 maxHeight: '400px',
-                                 width: '300px'
-                               }}>
-                            <Calendar
-                              mode="single"
-                              selected={reminder.customDateTime}
-                              onSelect={(selectedDate) => {
-                                if (selectedDate) {
-                                  const currentTime = reminder.customDateTime || getCurrentTaskDateTime();
-                                  const newDate = new Date(selectedDate);
-                                  newDate.setHours(
-                                    currentTime.getHours(),
-                                    currentTime.getMinutes(),
-                                    0,
-                                    0
-                                  );
-                                  updateReminder(reminder.id, { customDateTime: newDate });
-                                }
-                              }}
-                              initialFocus
-                              disabled={isSubmitting}
-                              className="rounded-md"
-                            />
-                            <div className="p-3 border-t bg-gray-50">
-                              <Label className="text-xs font-medium">Time</Label>
-                              <Input
-                                type="time"
-                                value={
-                                  reminder.customDateTime
-                                    ? format(reminder.customDateTime, "HH:mm")
-                                    : startTime // Use task's start time as default
-                                }
-                                onChange={(e) => {
-                                  const [hours, minutes] = e.target.value.split(':').map(Number);
-                                  const currentDate = reminder.customDateTime || new Date();
-                                  const newDateTime = new Date(currentDate);
-                                  newDateTime.setHours(hours, minutes, 0, 0);
-                                  updateReminder(reminder.id, { customDateTime: newDateTime });
-                                }}
-                                className="mt-1 h-8"
-                                disabled={isSubmitting}
-                              />
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
                   </div>
                 )}
               </div>

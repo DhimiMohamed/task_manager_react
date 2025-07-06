@@ -1,11 +1,21 @@
 "use client"
 
 import { useNavigate, useParams } from "react-router-dom"
-import { useProjectDetails } from "../hooks/useProjects"
+import { useProjectDetails, useUpdateProject } from "../hooks/useProjects"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Progress } from "@/components/ui/progress"
+import { cn } from "@/lib/utils"
+// Status options for select
+const statusOptions = [
+  { value: "planning", label: "Planning", color: "bg-gray-200 text-gray-900 dark:bg-gray-700 dark:text-gray-100 border-gray-300 dark:border-gray-600" },
+  { value: "active", label: "Active", color: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border-blue-300 dark:border-blue-700" },
+  { value: "on_hold", label: "On Hold", color: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-red-300 dark:border-red-700" },
+  { value: "completed", label: "Completed", color: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-300 dark:border-green-700" },
+]
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowLeft, Calendar } from "lucide-react"
 import { format, parseISO } from "date-fns"
@@ -13,6 +23,9 @@ import TaskBoard from "@/components/projects/task-board"
 import ActivityLog from "@/components/projects/activity-log"
 import MembersSection from "@/components/projects/members-section"
 import ProjectTimeline from "@/components/projects/project-timeline"
+
+// Import useStatistics for project progress
+import { useStatistics } from "@/hooks/useStatistics"
 
 // Use backend Project type
 
@@ -28,11 +41,27 @@ export interface ProjectFilters {
 
 
 
+
 export default function ProjectDetailPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { data: project, isLoading, error } = useProjectDetails(Number(id));
   const [activeTab, setActiveTab] = useState("overview");
+  const updateProjectMutation = useUpdateProject();
+
+  // Fetch statistics for progress
+  const { data: stats } = useStatistics();
+  // Find stats for this project (by name or id)
+  const projectStats = stats?.projects?.find((p) => p.name === project?.name);
+  const progress = projectStats?.completion_rate ?? 0;
+  const completedTasks = projectStats?.completed ?? 0;
+  const tasksCount = projectStats?.total ?? 0;
+
+  // Handler to update status
+  const updateStatus = (newStatus: string) => {
+    if (!project) return;
+    updateProjectMutation.mutate({ ...project, status: newStatus as typeof project.status });
+  };
 
   if (isLoading) return <div>Loading...</div>;
   if (error || !project) return <div>Project not found</div>;
@@ -53,7 +82,8 @@ export default function ProjectDetailPage() {
       </div>
 
       {/* Project Info Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+        {/* Team Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Team</CardTitle>
@@ -64,17 +94,32 @@ export default function ProjectDetailPage() {
           </CardContent>
         </Card>
 
+        {/* Status Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Status</CardTitle>
           </CardHeader>
           <CardContent>
-            <Badge variant="outline" className="capitalize">
-              {project.status}
-            </Badge>
+            <Select value={project.status} onValueChange={updateStatus}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((status) => (
+                  <SelectItem key={status.value} value={status.value}>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className={cn(status.color)}>
+                        {status.label}
+                      </Badge>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </CardContent>
         </Card>
 
+        {/* Start Date Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Start Date</CardTitle>
@@ -89,6 +134,23 @@ export default function ProjectDetailPage() {
           </CardContent>
         </Card>
 
+        {/* Progress Card (new) */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Progress</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>{completedTasks}/{tasksCount} tasks</span>
+                <span className="font-medium">{progress}%</span>
+              </div>
+              <Progress value={progress} className="h-2" />
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Deadline Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Deadline</CardTitle>
@@ -143,7 +205,7 @@ export default function ProjectDetailPage() {
               </div>
             </CardContent>
           </Card>
-          <TaskBoard projectId={project.id?.toString() ?? ""} />
+          <TaskBoard projectId={project.id?.toString() ?? ""} teamId={project.team} />
             </div>
             <div className="space-y-6">
               <MembersSection teamId={project.team} teamColor="red" projectId={project.id?.toString() ?? ""} teamName={project.team_name} />
@@ -153,7 +215,7 @@ export default function ProjectDetailPage() {
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-6">
-          <TaskBoard projectId={project.id?.toString() ?? ""} fullWidth />
+          <TaskBoard projectId={project.id?.toString() ?? ""} teamId={project.team} fullWidth />
         </TabsContent>
 
         <TabsContent value="timeline" className="mt-6">

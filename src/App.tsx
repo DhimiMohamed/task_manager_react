@@ -16,6 +16,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import StatisticsPage from './pages/StatisticsPage';
 import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
+import TeamsPage from './pages/TeamsPage';
 
 function App() {
   return (
@@ -63,6 +64,7 @@ function LayoutWithSidebar() {
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/:id" element={<ProjectDetailPage />} />
+          <Route path="teams" element={<TeamsPage />} />
           <Route path="categories" element={<CategoriesPage />} />
           {/* <Route path="tasks" element={<Tasks />} /> */}
           <Route path="tasks" element={<TasksPage />} />

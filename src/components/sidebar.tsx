@@ -14,6 +14,7 @@ import {
   X,
   Tag,
   FolderOpen,
+  Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +36,12 @@ const routes = [
     icon: FolderOpen,
     href: "/projects",
     color: "text-indigo-500",
+  },
+  {
+    label: "Teams",
+    icon: Users,
+    href: "/teams",
+    color: "text-cyan-500",
   },
   {
     label: "Calendar",

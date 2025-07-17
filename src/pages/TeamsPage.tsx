@@ -105,9 +105,7 @@ export default function TeamsPage() {
     setIsCreateDialogOpen(false)
   }
 
-  const handleDeleteTeam = (teamId: string) => {
-    setTeams(teams.filter((team) => team.id !== teamId))
-  }
+  
 
   const filteredTeams = teams.filter(
     (team) =>
@@ -196,7 +194,7 @@ export default function TeamsPage() {
             <Crown className="h-5 w-5 text-yellow-500" />
             <h2 className="text-xl font-semibold">Your Teams</h2>
           </div>
-          <TeamList teams={ownedTeams} onDelete={handleDeleteTeam} />
+          <TeamList  />
         </div>
       )}
 
@@ -207,7 +205,7 @@ export default function TeamsPage() {
             <Users className="h-5 w-5 text-blue-500" />
             <h2 className="text-xl font-semibold">Member Of</h2>
           </div>
-          <TeamList teams={memberTeams} onDelete={handleDeleteTeam} />
+          <TeamList  />
         </div>
       )}
 

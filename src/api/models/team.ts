@@ -15,6 +15,9 @@
 
 // May contain unused imports in some cases
 // @ts-ignore
+import type { TeamInvitation } from './team-invitation';
+// May contain unused imports in some cases
+// @ts-ignore
 import type { TeamMembership } from './team-membership';
 
 /**
@@ -37,16 +40,46 @@ export interface Team {
     'name': string;
     /**
      * 
+     * @type {string}
+     * @memberof Team
+     */
+    'color'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Team
+     */
+    'owner'?: string;
+    /**
+     * 
      * @type {Array<TeamMembership>}
      * @memberof Team
      */
     'members'?: Array<TeamMembership>;
     /**
      * 
+     * @type {Array<TeamInvitation>}
+     * @memberof Team
+     */
+    'invitations'?: Array<TeamInvitation>;
+    /**
+     * 
      * @type {number}
      * @memberof Team
      */
     'member_count'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof Team
+     */
+    'project_count'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof Team
+     */
+    'pending_invitations_count'?: string;
     /**
      * 
      * @type {string}

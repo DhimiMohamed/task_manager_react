@@ -16,6 +16,7 @@
 
 export * from './apis/aiassistant-api';
 export * from './apis/accounts-api';
+export * from './apis/activity-api';
 export * from './apis/projects-api';
 export * from './apis/reminders-api';
 export * from './apis/tasks-api';

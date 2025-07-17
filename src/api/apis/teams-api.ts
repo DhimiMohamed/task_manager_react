@@ -24,6 +24,8 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
 // @ts-ignore
 import type { Team } from '../models';
 // @ts-ignore
+import type { TeamInvitation } from '../models';
+// @ts-ignore
 import type { TeamMembership } from '../models';
 /**
  * TeamsApi - axios parameter creator
@@ -99,6 +101,328 @@ export const TeamsApiAxiosParamCreator = function (configuration?: Configuration
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Accept team invitation via token (for email links)
+         * @param {string} token 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsAcceptCreate: async (token: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'token' is not null or undefined
+            assertParamExists('teamsInvitationsAcceptCreate', 'token', token)
+            const localVarPath = `/teams/invitations/accept/{token}/`
+                .replace(`{${"token"}}`, encodeURIComponent(String(token)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Accept team invitation via token (for email links)
+         * @param {string} token 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsAcceptRead: async (token: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'token' is not null or undefined
+            assertParamExists('teamsInvitationsAcceptRead', 'token', token)
+            const localVarPath = `/teams/invitations/accept/{token}/`
+                .replace(`{${"token"}}`, encodeURIComponent(String(token)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {TeamInvitation} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsCreate: async (teamId: string, data: TeamInvitation, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'teamId' is not null or undefined
+            assertParamExists('teamsInvitationsCreate', 'teamId', teamId)
+            // verify required parameter 'data' is not null or undefined
+            assertParamExists('teamsInvitationsCreate', 'data', data)
+            const localVarPath = `/teams/{team_id}/invitations/`
+                .replace(`{${"team_id"}}`, encodeURIComponent(String(teamId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsDelete: async (teamId: string, id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'teamId' is not null or undefined
+            assertParamExists('teamsInvitationsDelete', 'teamId', teamId)
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('teamsInvitationsDelete', 'id', id)
+            const localVarPath = `/teams/{team_id}/invitations/{id}/`
+                .replace(`{${"team_id"}}`, encodeURIComponent(String(teamId)))
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsList: async (teamId: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'teamId' is not null or undefined
+            assertParamExists('teamsInvitationsList', 'teamId', teamId)
+            const localVarPath = `/teams/{team_id}/invitations/`
+                .replace(`{${"team_id"}}`, encodeURIComponent(String(teamId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {TeamInvitation} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsPartialUpdate: async (teamId: string, id: string, data: TeamInvitation, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'teamId' is not null or undefined
+            assertParamExists('teamsInvitationsPartialUpdate', 'teamId', teamId)
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('teamsInvitationsPartialUpdate', 'id', id)
+            // verify required parameter 'data' is not null or undefined
+            assertParamExists('teamsInvitationsPartialUpdate', 'data', data)
+            const localVarPath = `/teams/{team_id}/invitations/{id}/`
+                .replace(`{${"team_id"}}`, encodeURIComponent(String(teamId)))
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsRead: async (teamId: string, id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'teamId' is not null or undefined
+            assertParamExists('teamsInvitationsRead', 'teamId', teamId)
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('teamsInvitationsRead', 'id', id)
+            const localVarPath = `/teams/{team_id}/invitations/{id}/`
+                .replace(`{${"team_id"}}`, encodeURIComponent(String(teamId)))
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {TeamInvitation} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsUpdate: async (teamId: string, id: string, data: TeamInvitation, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'teamId' is not null or undefined
+            assertParamExists('teamsInvitationsUpdate', 'teamId', teamId)
+            // verify required parameter 'id' is not null or undefined
+            assertParamExists('teamsInvitationsUpdate', 'id', id)
+            // verify required parameter 'data' is not null or undefined
+            assertParamExists('teamsInvitationsUpdate', 'data', data)
+            const localVarPath = `/teams/{team_id}/invitations/{id}/`
+                .replace(`{${"team_id"}}`, encodeURIComponent(String(teamId)))
+                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -393,168 +717,9 @@ export const TeamsApiAxiosParamCreator = function (configuration?: Configuration
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        teamsMembershipsDelete: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'id' is not null or undefined
-            assertParamExists('teamsMembershipsDelete', 'id', id)
-            const localVarPath = `/teams/memberships/{id}/`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication Bearer required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {TeamMembership} data 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        teamsMembershipsPartialUpdate: async (id: string, data: TeamMembership, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'id' is not null or undefined
-            assertParamExists('teamsMembershipsPartialUpdate', 'id', id)
-            // verify required parameter 'data' is not null or undefined
-            assertParamExists('teamsMembershipsPartialUpdate', 'data', data)
-            const localVarPath = `/teams/memberships/{id}/`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication Bearer required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        teamsMembershipsRead: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'id' is not null or undefined
-            assertParamExists('teamsMembershipsRead', 'id', id)
-            const localVarPath = `/teams/memberships/{id}/`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication Bearer required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {TeamMembership} data 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        teamsMembershipsUpdate: async (id: string, data: TeamMembership, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'id' is not null or undefined
-            assertParamExists('teamsMembershipsUpdate', 'id', id)
-            // verify required parameter 'data' is not null or undefined
-            assertParamExists('teamsMembershipsUpdate', 'data', data)
-            const localVarPath = `/teams/memberships/{id}/`
-                .replace(`{${"id"}}`, encodeURIComponent(String(id)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication Bearer required
-            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {Team} data 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        teamsPartialUpdate: async (id: string, data: Team, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        teamsPartialUpdate: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('teamsPartialUpdate', 'id', id)
-            // verify required parameter 'data' is not null or undefined
-            assertParamExists('teamsPartialUpdate', 'data', data)
             const localVarPath = `/teams/{id}/`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -573,12 +738,9 @@ export const TeamsApiAxiosParamCreator = function (configuration?: Configuration
 
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -624,15 +786,12 @@ export const TeamsApiAxiosParamCreator = function (configuration?: Configuration
         /**
          * 
          * @param {string} id 
-         * @param {Team} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        teamsUpdate: async (id: string, data: Team, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+        teamsUpdate: async (id: string, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'id' is not null or undefined
             assertParamExists('teamsUpdate', 'id', id)
-            // verify required parameter 'data' is not null or undefined
-            assertParamExists('teamsUpdate', 'data', data)
             const localVarPath = `/teams/{id}/`
                 .replace(`{${"id"}}`, encodeURIComponent(String(id)));
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
@@ -651,12 +810,9 @@ export const TeamsApiAxiosParamCreator = function (configuration?: Configuration
 
 
     
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -695,6 +851,109 @@ export const TeamsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.teamsDelete(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Accept team invitation via token (for email links)
+         * @param {string} token 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async teamsInvitationsAcceptCreate(token: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsInvitationsAcceptCreate(token, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsInvitationsAcceptCreate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * Accept team invitation via token (for email links)
+         * @param {string} token 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async teamsInvitationsAcceptRead(token: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsInvitationsAcceptRead(token, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsInvitationsAcceptRead']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {TeamInvitation} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async teamsInvitationsCreate(teamId: string, data: TeamInvitation, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TeamInvitation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsInvitationsCreate(teamId, data, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsInvitationsCreate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async teamsInvitationsDelete(teamId: string, id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsInvitationsDelete(teamId, id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsInvitationsDelete']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async teamsInvitationsList(teamId: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<TeamInvitation>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsInvitationsList(teamId, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsInvitationsList']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {TeamInvitation} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async teamsInvitationsPartialUpdate(teamId: string, id: string, data: TeamInvitation, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TeamInvitation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsInvitationsPartialUpdate(teamId, id, data, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsInvitationsPartialUpdate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async teamsInvitationsRead(teamId: string, id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TeamInvitation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsInvitationsRead(teamId, id, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsInvitationsRead']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {TeamInvitation} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async teamsInvitationsUpdate(teamId: string, id: string, data: TeamInvitation, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TeamInvitation>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsInvitationsUpdate(teamId, id, data, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsInvitationsUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -793,59 +1052,8 @@ export const TeamsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async teamsMembershipsDelete(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsMembershipsDelete(id, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsMembershipsDelete']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {TeamMembership} data 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async teamsMembershipsPartialUpdate(id: string, data: TeamMembership, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TeamMembership>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsMembershipsPartialUpdate(id, data, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsMembershipsPartialUpdate']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async teamsMembershipsRead(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TeamMembership>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsMembershipsRead(id, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsMembershipsRead']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {TeamMembership} data 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async teamsMembershipsUpdate(id: string, data: TeamMembership, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<TeamMembership>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsMembershipsUpdate(id, data, options);
-            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
-            const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsMembershipsUpdate']?.[localVarOperationServerIndex]?.url;
-            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {Team} data 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async teamsPartialUpdate(id: string, data: Team, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Team>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsPartialUpdate(id, data, options);
+        async teamsPartialUpdate(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsPartialUpdate(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsPartialUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -856,7 +1064,7 @@ export const TeamsApiFp = function(configuration?: Configuration) {
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async teamsRead(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Team>> {
+        async teamsRead(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.teamsRead(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsRead']?.[localVarOperationServerIndex]?.url;
@@ -865,12 +1073,11 @@ export const TeamsApiFp = function(configuration?: Configuration) {
         /**
          * 
          * @param {string} id 
-         * @param {Team} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async teamsUpdate(id: string, data: Team, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Team>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsUpdate(id, data, options);
+        async teamsUpdate(id: string, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.teamsUpdate(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['TeamsApi.teamsUpdate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
@@ -902,6 +1109,85 @@ export const TeamsApiFactory = function (configuration?: Configuration, basePath
          */
         teamsDelete(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.teamsDelete(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Accept team invitation via token (for email links)
+         * @param {string} token 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsAcceptCreate(token: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.teamsInvitationsAcceptCreate(token, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Accept team invitation via token (for email links)
+         * @param {string} token 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsAcceptRead(token: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.teamsInvitationsAcceptRead(token, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {TeamInvitation} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsCreate(teamId: string, data: TeamInvitation, options?: RawAxiosRequestConfig): AxiosPromise<TeamInvitation> {
+            return localVarFp.teamsInvitationsCreate(teamId, data, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsDelete(teamId: string, id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.teamsInvitationsDelete(teamId, id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsList(teamId: string, options?: RawAxiosRequestConfig): AxiosPromise<Array<TeamInvitation>> {
+            return localVarFp.teamsInvitationsList(teamId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {TeamInvitation} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsPartialUpdate(teamId: string, id: string, data: TeamInvitation, options?: RawAxiosRequestConfig): AxiosPromise<TeamInvitation> {
+            return localVarFp.teamsInvitationsPartialUpdate(teamId, id, data, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsRead(teamId: string, id: string, options?: RawAxiosRequestConfig): AxiosPromise<TeamInvitation> {
+            return localVarFp.teamsInvitationsRead(teamId, id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {string} teamId 
+         * @param {string} id 
+         * @param {TeamInvitation} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        teamsInvitationsUpdate(teamId: string, id: string, data: TeamInvitation, options?: RawAxiosRequestConfig): AxiosPromise<TeamInvitation> {
+            return localVarFp.teamsInvitationsUpdate(teamId, id, data, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -978,18 +1264,8 @@ export const TeamsApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        teamsMembershipsDelete(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
-            return localVarFp.teamsMembershipsDelete(id, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {TeamMembership} data 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        teamsMembershipsPartialUpdate(id: string, data: TeamMembership, options?: RawAxiosRequestConfig): AxiosPromise<TeamMembership> {
-            return localVarFp.teamsMembershipsPartialUpdate(id, data, options).then((request) => request(axios, basePath));
+        teamsPartialUpdate(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.teamsPartialUpdate(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -997,47 +1273,17 @@ export const TeamsApiFactory = function (configuration?: Configuration, basePath
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        teamsMembershipsRead(id: string, options?: RawAxiosRequestConfig): AxiosPromise<TeamMembership> {
-            return localVarFp.teamsMembershipsRead(id, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {TeamMembership} data 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        teamsMembershipsUpdate(id: string, data: TeamMembership, options?: RawAxiosRequestConfig): AxiosPromise<TeamMembership> {
-            return localVarFp.teamsMembershipsUpdate(id, data, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {Team} data 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        teamsPartialUpdate(id: string, data: Team, options?: RawAxiosRequestConfig): AxiosPromise<Team> {
-            return localVarFp.teamsPartialUpdate(id, data, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * 
-         * @param {string} id 
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        teamsRead(id: string, options?: RawAxiosRequestConfig): AxiosPromise<Team> {
+        teamsRead(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
             return localVarFp.teamsRead(id, options).then((request) => request(axios, basePath));
         },
         /**
          * 
          * @param {string} id 
-         * @param {Team} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        teamsUpdate(id: string, data: Team, options?: RawAxiosRequestConfig): AxiosPromise<Team> {
-            return localVarFp.teamsUpdate(id, data, options).then((request) => request(axios, basePath));
+        teamsUpdate(id: string, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.teamsUpdate(id, options).then((request) => request(axios, basePath));
         },
     };
 };
@@ -1069,6 +1315,101 @@ export class TeamsApi extends BaseAPI {
      */
     public teamsDelete(id: string, options?: RawAxiosRequestConfig) {
         return TeamsApiFp(this.configuration).teamsDelete(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Accept team invitation via token (for email links)
+     * @param {string} token 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TeamsApi
+     */
+    public teamsInvitationsAcceptCreate(token: string, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsInvitationsAcceptCreate(token, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Accept team invitation via token (for email links)
+     * @param {string} token 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TeamsApi
+     */
+    public teamsInvitationsAcceptRead(token: string, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsInvitationsAcceptRead(token, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} teamId 
+     * @param {TeamInvitation} data 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TeamsApi
+     */
+    public teamsInvitationsCreate(teamId: string, data: TeamInvitation, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsInvitationsCreate(teamId, data, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} teamId 
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TeamsApi
+     */
+    public teamsInvitationsDelete(teamId: string, id: string, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsInvitationsDelete(teamId, id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} teamId 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TeamsApi
+     */
+    public teamsInvitationsList(teamId: string, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsInvitationsList(teamId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} teamId 
+     * @param {string} id 
+     * @param {TeamInvitation} data 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TeamsApi
+     */
+    public teamsInvitationsPartialUpdate(teamId: string, id: string, data: TeamInvitation, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsInvitationsPartialUpdate(teamId, id, data, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} teamId 
+     * @param {string} id 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TeamsApi
+     */
+    public teamsInvitationsRead(teamId: string, id: string, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsInvitationsRead(teamId, id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {string} teamId 
+     * @param {string} id 
+     * @param {TeamInvitation} data 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TeamsApi
+     */
+    public teamsInvitationsUpdate(teamId: string, id: string, data: TeamInvitation, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsInvitationsUpdate(teamId, id, data, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1161,55 +1502,8 @@ export class TeamsApi extends BaseAPI {
      * @throws {RequiredError}
      * @memberof TeamsApi
      */
-    public teamsMembershipsDelete(id: string, options?: RawAxiosRequestConfig) {
-        return TeamsApiFp(this.configuration).teamsMembershipsDelete(id, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {TeamMembership} data 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TeamsApi
-     */
-    public teamsMembershipsPartialUpdate(id: string, data: TeamMembership, options?: RawAxiosRequestConfig) {
-        return TeamsApiFp(this.configuration).teamsMembershipsPartialUpdate(id, data, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TeamsApi
-     */
-    public teamsMembershipsRead(id: string, options?: RawAxiosRequestConfig) {
-        return TeamsApiFp(this.configuration).teamsMembershipsRead(id, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {TeamMembership} data 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TeamsApi
-     */
-    public teamsMembershipsUpdate(id: string, data: TeamMembership, options?: RawAxiosRequestConfig) {
-        return TeamsApiFp(this.configuration).teamsMembershipsUpdate(id, data, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * 
-     * @param {string} id 
-     * @param {Team} data 
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof TeamsApi
-     */
-    public teamsPartialUpdate(id: string, data: Team, options?: RawAxiosRequestConfig) {
-        return TeamsApiFp(this.configuration).teamsPartialUpdate(id, data, options).then((request) => request(this.axios, this.basePath));
+    public teamsPartialUpdate(id: string, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsPartialUpdate(id, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -1226,13 +1520,12 @@ export class TeamsApi extends BaseAPI {
     /**
      * 
      * @param {string} id 
-     * @param {Team} data 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof TeamsApi
      */
-    public teamsUpdate(id: string, data: Team, options?: RawAxiosRequestConfig) {
-        return TeamsApiFp(this.configuration).teamsUpdate(id, data, options).then((request) => request(this.axios, this.basePath));
+    public teamsUpdate(id: string, options?: RawAxiosRequestConfig) {
+        return TeamsApiFp(this.configuration).teamsUpdate(id, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

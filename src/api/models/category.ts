@@ -50,11 +50,5 @@ export interface Category {
      * @memberof Category
      */
     'user'?: number;
-    /**
-     * 
-     * @type {number}
-     * @memberof Category
-     */
-    'project': number | null;
 }
 

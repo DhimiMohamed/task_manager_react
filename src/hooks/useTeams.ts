@@ -1,7 +1,8 @@
-// src/hooks/useTeams.ts
+// src\hooks\useTeams.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { TeamsApi } from '../api/apis/teams-api';
 import { TeamMembership } from '../api/models/team-membership';
+import { TeamInvitation } from '../api/models/team-invitation';
 import { Team } from '../api/models/team';
 import customAxios from "../lib/customAxios";
 
@@ -17,17 +18,6 @@ export function useTeams() {
       return response.data;
     },
     staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-}
-
-export function useTeamDetails(id: number) {
-  return useQuery<Team>({
-    queryKey: ['teams', id],
-    queryFn: async () => {
-      const response = await teamsApi.teamsRead(id.toString());
-      return response.data;
-    },
-    staleTime: 1000 * 60 * 5,
   });
 }
 
@@ -48,7 +38,8 @@ export function useUpdateTeam() {
       if (id === undefined) {
         throw new Error("Team ID is required for update");
       }
-      return teamsApi.teamsUpdate(id.toString(), team);
+      // Use teamsPartialUpdate for PATCH with data
+      return teamsApi.teamsPartialUpdate(id.toString(), { data: team });
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['teams'] });
@@ -129,12 +120,11 @@ export function useRemoveTeamMember() {
   });
 }
 
-// Membership-specific operations (for the current user)
-export function useUserMembershipDetails(membershipId: number) {
+export function useUserMembershipDetails(teamId: number, memberId: number) {
   return useQuery<TeamMembership>({
-    queryKey: ['memberships', membershipId],
+    queryKey: ['memberships', memberId],
     queryFn: async () => {
-      const response = await teamsApi.teamsMembershipsRead(membershipId.toString());
+      const response = await teamsApi.teamsMembersRead(teamId.toString(), memberId.toString());
       return response.data;
     },
     staleTime: 1000 * 60 * 5,
@@ -144,13 +134,12 @@ export function useUserMembershipDetails(membershipId: number) {
 export function useUpdateUserMembership() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...data }: { id: number } & TeamMembership) => {
-      return teamsApi.teamsMembershipsUpdate(id.toString(), data);
+    mutationFn: ({ teamId, id, ...data }: { teamId: number, id: number } & TeamMembership) => {
+      return teamsApi.teamsMembersUpdate(teamId.toString(), id.toString(), data);
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['memberships', variables.id] });
-      // Also invalidate any team member queries that might include this membership
-      queryClient.invalidateQueries({ queryKey: ['teams', variables.team, 'members'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId, 'members'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId, 'members', variables.id] });
     },
   });
 }
@@ -158,12 +147,87 @@ export function useUpdateUserMembership() {
 export function useLeaveTeam() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (membershipId: number) => {
-      return teamsApi.teamsMembershipsDelete(membershipId.toString());
+    mutationFn: ({ teamId, id }: { teamId: number, id: number }) => {
+      return teamsApi.teamsMembersDelete(teamId.toString(), id.toString());
     },
-    onSuccess: (_, ) => {
-      queryClient.invalidateQueries({ queryKey: ['memberships'] });
-      queryClient.invalidateQueries({ queryKey: ['teams'] });
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId, 'members'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId] });
     },
+  });
+}
+
+// Team Invitations operations
+export function useTeamInvitations(teamId: number) {
+  return useQuery<TeamInvitation[]>({
+    queryKey: ['teams', teamId, 'invitations'],
+    queryFn: async () => {
+      const response = await teamsApi.teamsInvitationsList(teamId.toString());
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+}
+
+export function useCreateTeamInvitation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ teamId, ...data }: { teamId: number } & TeamInvitation) => {
+      return teamsApi.teamsInvitationsCreate(teamId.toString(), data);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId, 'invitations'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId] });
+    },
+  });
+}
+
+export function useUpdateTeamInvitation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ teamId, id, ...data }: { teamId: number, id: number } & TeamInvitation) => {
+      return teamsApi.teamsInvitationsUpdate(teamId.toString(), id.toString(), data);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId, 'invitations'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId, 'invitations', variables.id] });
+    },
+  });
+}
+
+export function usePartialUpdateTeamInvitation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ teamId, id, ...data }: { teamId: number, id: number } & TeamInvitation) => {
+      return teamsApi.teamsInvitationsPartialUpdate(teamId.toString(), id.toString(), data);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId, 'invitations'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId, 'invitations', variables.id] });
+    },
+  });
+}
+
+export function useDeleteTeamInvitation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ teamId, id }: { teamId: number, id: number }) => {
+      return teamsApi.teamsInvitationsDelete(teamId.toString(), id.toString());
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId, 'invitations'] });
+      queryClient.invalidateQueries({ queryKey: ['teams', variables.teamId] });
+    },
+  });
+}
+
+export function useTeamInvitationDetails(teamId: number, id: number) {
+  return useQuery<TeamInvitation>({
+    queryKey: ['teams', teamId, 'invitations', id],
+    queryFn: async () => {
+      const response = await teamsApi.teamsInvitationsRead(teamId.toString(), id.toString());
+      return response.data;
+    },
+    staleTime: 1000 * 60 * 5,
   });
 }

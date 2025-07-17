@@ -76,10 +76,22 @@ export interface Task {
     'user'?: number;
     /**
      * 
+     * @type {string}
+     * @memberof Task
+     */
+    'user_email'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof Task
      */
     'category'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Task
+     */
+    'category_name'?: string;
     /**
      * 
      * @type {number}
@@ -100,10 +112,22 @@ export interface Task {
     'project'?: number | null;
     /**
      * 
+     * @type {string}
+     * @memberof Task
+     */
+    'project_name'?: string;
+    /**
+     * 
      * @type {number}
      * @memberof Task
      */
     'assigned_to'?: number | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Task
+     */
+    'assigned_to_email'?: string | null;
     /**
      * 
      * @type {Set<number>}

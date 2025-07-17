@@ -273,6 +273,82 @@ export const TasksApiAxiosParamCreator = function (configuration?: Configuration
         },
         /**
          * 
+         * @param {Task} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tasksBulkUpdatePartialUpdate: async (data: Task, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'data' is not null or undefined
+            assertParamExists('tasksBulkUpdatePartialUpdate', 'data', data)
+            const localVarPath = `/tasks/bulk_update/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PATCH', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {Task} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tasksBulkUpdateUpdate: async (data: Task, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'data' is not null or undefined
+            assertParamExists('tasksBulkUpdateUpdate', 'data', data)
+            const localVarPath = `/tasks/bulk_update/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
          * @param {Category} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1375,6 +1451,30 @@ export const TasksApiFp = function(configuration?: Configuration) {
         },
         /**
          * 
+         * @param {Task} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async tasksBulkUpdatePartialUpdate(data: Task, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Task>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.tasksBulkUpdatePartialUpdate(data, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TasksApi.tasksBulkUpdatePartialUpdate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @param {Task} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async tasksBulkUpdateUpdate(data: Task, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Task>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.tasksBulkUpdateUpdate(data, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TasksApi.tasksBulkUpdateUpdate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
          * @param {Category} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -1769,6 +1869,24 @@ export const TasksApiFactory = function (configuration?: Configuration, basePath
         },
         /**
          * 
+         * @param {Task} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tasksBulkUpdatePartialUpdate(data: Task, options?: RawAxiosRequestConfig): AxiosPromise<Task> {
+            return localVarFp.tasksBulkUpdatePartialUpdate(data, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {Task} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tasksBulkUpdateUpdate(data: Task, options?: RawAxiosRequestConfig): AxiosPromise<Task> {
+            return localVarFp.tasksBulkUpdateUpdate(data, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
          * @param {Category} data 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -2090,6 +2208,28 @@ export class TasksApi extends BaseAPI {
      */
     public tasksBetweenDatesList(options?: RawAxiosRequestConfig) {
         return TasksApiFp(this.configuration).tasksBetweenDatesList(options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {Task} data 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TasksApi
+     */
+    public tasksBulkUpdatePartialUpdate(data: Task, options?: RawAxiosRequestConfig) {
+        return TasksApiFp(this.configuration).tasksBulkUpdatePartialUpdate(data, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {Task} data 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TasksApi
+     */
+    public tasksBulkUpdateUpdate(data: Task, options?: RawAxiosRequestConfig) {
+        return TasksApiFp(this.configuration).tasksBulkUpdateUpdate(data, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

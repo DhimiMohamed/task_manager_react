@@ -36,6 +36,18 @@ export interface Profile {
      */
     'bio'?: string | null;
     /**
+     * Comma-separated list of skills
+     * @type {string}
+     * @memberof Profile
+     */
+    'skills'?: string | null;
+    /**
+     * Details about user\'s experience
+     * @type {string}
+     * @memberof Profile
+     */
+    'experience'?: string | null;
+    /**
      * 
      * @type {string}
      * @memberof Profile

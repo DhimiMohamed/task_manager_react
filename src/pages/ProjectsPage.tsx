@@ -259,7 +259,8 @@ export default function ProjectsPage() {
 
             // Fallbacks for UI fields not in backend
             const isFavorite = false; // No favorite in backend
-            const teamColor = "bg-gray-400"; // No color in backend
+            const teamObj = teamsData.find((team) => team.name === project.team_name);
+            const teamColor = teamObj?.color ? teamObj.color : "bg-gray-400";
             const teamName = project.team_name ?? "Unknown Team";
             const progress = completionRate;
             const deadline = project.end_date;
@@ -300,7 +301,7 @@ export default function ProjectsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 mt-2">
-                    <div className={cn("w-3 h-3 rounded-full", teamColor)}></div>
+                    <div className={cn("w-3 h-3 rounded-full")} style={{backgroundColor: teamColor}}></div>
                     <span className="text-sm text-muted-foreground">{teamName}</span>
                   </div>
                 </CardHeader>

@@ -1,120 +1,59 @@
-"use client"
-
+// src/pages/TeamsPage.tsx
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { PlusCircle, Search, Users, Crown } from "lucide-react"
+import { PlusCircle, Search, Users, Crown, Loader2 } from "lucide-react"
 import TeamForm from "@/components/teams/team-form"
 import TeamList from "@/components/teams/team-list"
-export interface Team {
-  id: string
-  name: string
-  description: string
-  color: string
-  createdAt: string
-  createdBy: string
-  memberCount: number
-  projectCount: number
-  isOwner: boolean
-}
-
-export interface TeamMember {
-  id: string
-  name: string
-  email: string
-  role: "owner" | "admin" | "member"
-  avatar?: string
-  joinedAt: string
-  status: "active" | "pending" | "inactive"
-}
-
-export interface TeamInvitation {
-  id: string
-  email: string
-  role: "admin" | "member"
-  invitedBy: string
-  invitedAt: string
-  status: "pending" | "accepted" | "declined"
-}
-
-// Sample teams data
-const sampleTeams: Team[] = [
-  {
-    id: "1",
-    name: "Design Team",
-    description: "Creative design and user experience team",
-    color: "bg-purple-500",
-    createdAt: "2025-01-15T09:00:00",
-    createdBy: "Alice Johnson",
-    memberCount: 8,
-    projectCount: 12,
-    isOwner: true,
-  },
-  {
-    id: "2",
-    name: "Development Team",
-    description: "Frontend and backend development specialists",
-    color: "bg-blue-500",
-    createdAt: "2025-02-01T09:00:00",
-    createdBy: "Bob Smith",
-    memberCount: 15,
-    projectCount: 8,
-    isOwner: false,
-  },
-  {
-    id: "3",
-    name: "Marketing Team",
-    description: "Digital marketing and growth team",
-    color: "bg-green-500",
-    createdAt: "2025-02-10T09:00:00",
-    createdBy: "Carol Davis",
-    memberCount: 6,
-    projectCount: 5,
-    isOwner: false,
-  },
-  {
-    id: "4",
-    name: "QA Team",
-    description: "Quality assurance and testing specialists",
-    color: "bg-orange-500",
-    createdAt: "2025-03-01T09:00:00",
-    createdBy: "David Wilson",
-    memberCount: 4,
-    projectCount: 3,
-    isOwner: true,
-  },
-]
+import { useTeams } from "@/hooks/useTeams"
 
 export default function TeamsPage() {
-  const [teams, setTeams] = useState<Team[]>(sampleTeams)
   const [searchQuery, setSearchQuery] = useState("")
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
 
-  const handleCreateTeam = (teamData: Omit<Team, "id" | "createdAt" | "memberCount" | "projectCount" | "isOwner">) => {
-    const newTeam: Team = {
-      id: Math.random().toString(36).substring(2, 9),
-      ...teamData,
-      createdAt: new Date().toISOString(),
-      memberCount: 1,
-      projectCount: 0,
-      isOwner: true,
-    }
-    setTeams([...teams, newTeam])
+  // Use the API hook to fetch teams
+  const { data: teams = [], isLoading, error } = useTeams()
+  console.log('All teams:', teams)
+
+  const handleTeamCreated = () => {
     setIsCreateDialogOpen(false)
   }
 
-  
-
   const filteredTeams = teams.filter(
     (team) =>
-      team.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      team.description.toLowerCase().includes(searchQuery.toLowerCase()),
+      team.name.toLowerCase().includes(searchQuery.toLowerCase())
   )
+  console.log('Filtered teams:', filteredTeams)
 
-  const ownedTeams = filteredTeams.filter((team) => team.isOwner)
-  const memberTeams = filteredTeams.filter((team) => !team.isOwner)
+  
+  const ownedTeams = filteredTeams.filter((team) => Boolean(team.is_admin))
+  const memberTeams = filteredTeams.filter((team) => !team.is_admin)
+  console.log('Owned teams:', ownedTeams)
+  console.log('Member teams:', memberTeams)
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin" />
+        <span className="ml-2 text-muted-foreground">Loading teams...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <div className="text-center space-y-2">
+            <h3 className="text-lg font-medium text-red-600">Error loading teams</h3>
+            <p className="text-muted-foreground">Please try refreshing the page</p>
+          </div>
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -134,7 +73,7 @@ export default function TeamsPage() {
             <DialogHeader>
               <DialogTitle>Create New Team</DialogTitle>
             </DialogHeader>
-            <TeamForm onSubmit={handleCreateTeam} />
+            <TeamForm onSuccess={handleTeamCreated} />
           </DialogContent>
         </Dialog>
       </div>
@@ -172,7 +111,9 @@ export default function TeamsPage() {
             <CardTitle className="text-sm font-medium">Total Members</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{teams.reduce((sum, team) => sum + team.memberCount, 0)}</div>
+            <div className="text-2xl font-bold">
+              {teams.reduce((sum, team) => sum + (team.member_count || 0), 0)}
+            </div>
             <p className="text-xs text-muted-foreground">Across all teams</p>
           </CardContent>
         </Card>
@@ -181,7 +122,9 @@ export default function TeamsPage() {
             <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{teams.reduce((sum, team) => sum + team.projectCount, 0)}</div>
+            <div className="text-2xl font-bold">
+              {teams.reduce((sum, team) => sum + parseInt(team.project_count || '0'), 0)}
+            </div>
             <p className="text-xs text-muted-foreground">Team projects</p>
           </CardContent>
         </Card>
@@ -194,7 +137,7 @@ export default function TeamsPage() {
             <Crown className="h-5 w-5 text-yellow-500" />
             <h2 className="text-xl font-semibold">Your Teams</h2>
           </div>
-          <TeamList  />
+          <TeamList teams={ownedTeams} />
         </div>
       )}
 
@@ -205,18 +148,23 @@ export default function TeamsPage() {
             <Users className="h-5 w-5 text-blue-500" />
             <h2 className="text-xl font-semibold">Member Of</h2>
           </div>
-          <TeamList  />
+          <TeamList teams={memberTeams} />
         </div>
       )}
 
       {/* Empty State */}
-      {filteredTeams.length === 0 && (
+      {filteredTeams.length === 0 && !isLoading && (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="text-center space-y-2">
-              <h3 className="text-lg font-medium">{searchQuery ? "No teams found" : "No teams yet"}</h3>
+              <h3 className="text-lg font-medium">
+                {searchQuery ? "No teams found" : "No teams yet"}
+              </h3>
               <p className="text-muted-foreground">
-                {searchQuery ? "Try adjusting your search terms" : "Create your first team to start collaborating"}
+                {searchQuery 
+                  ? "Try adjusting your search terms" 
+                  : "Create your first team to start collaborating"
+                }
               </p>
               {!searchQuery && (
                 <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -230,7 +178,7 @@ export default function TeamsPage() {
                     <DialogHeader>
                       <DialogTitle>Create New Team</DialogTitle>
                     </DialogHeader>
-                    <TeamForm onSubmit={handleCreateTeam} />
+                    <TeamForm onSuccess={handleTeamCreated} />
                   </DialogContent>
                 </Dialog>
               )}

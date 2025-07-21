@@ -85,13 +85,13 @@ const statusColors = {
 export default function ProjectTimeline({  }: ProjectTimelineProps) {
   const projectStart = new Date("2025-03-01")
   const projectEnd = new Date("2025-04-15")
-  const totalDays = differenceInDays(projectEnd, projectStart)
+  const totalDays = differenceInDays(projectEnd, projectStart) + 1
 
   const getTaskPosition = (startDate: string, endDate: string) => {
     const start = parseISO(startDate)
     const end = parseISO(endDate)
     const startOffset = differenceInDays(start, projectStart)
-    const duration = differenceInDays(end, start)
+    const duration = differenceInDays(end, start) + 1
 
     const leftPercent = (startOffset / totalDays) * 100
     const widthPercent = (duration / totalDays) * 100
@@ -155,22 +155,21 @@ export default function ProjectTimeline({  }: ProjectTimelineProps) {
               return (
                 <div key={task.id} className="relative">
                   <div className="flex items-center gap-4 mb-2">
-                    <div className="w-48 flex-shrink-0">
-                      <h4 className="font-medium text-sm">{task.title}</h4>
-                      <p className="text-xs text-muted-foreground">{task.assignee}</p>
-                    </div>
-
-                    <div className="flex-1 relative h-8">
+                    <div className="flex-1 relative h-16"> {/* Increased height to accommodate two lines */}
                       <div
                         className={cn(
-                          "absolute top-1 bottom-1 rounded-md flex items-center px-2",
+                          "absolute top-1 bottom-1 rounded-md flex flex-col px-2 py-1",
                           task.status === "completed" && "bg-green-200 dark:bg-green-800",
                           task.status === "in-progress" && "bg-blue-200 dark:bg-blue-800",
                           task.status === "upcoming" && "bg-gray-200 dark:bg-gray-700",
                         )}
-                        style={position}
+                        style={{
+                          left: position.left,
+                          width: `max(60px, ${position.width})`, // Increased minimum width
+                        }}
                       >
                         <span className="text-xs font-medium truncate">{task.title}</span>
+                        <span className="text-xs text-muted-foreground truncate">{task.assignee}</span>
                       </div>
                     </div>
 
@@ -182,12 +181,12 @@ export default function ProjectTimeline({  }: ProjectTimelineProps) {
                   </div>
 
                   <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <div className="w-48 flex items-center gap-1">
+                    <div className="flex-1 flex items-center gap-1">
                       <Clock className="h-3 w-3" />
-                      {differenceInDays(parseISO(task.endDate), parseISO(task.startDate))} days
-                    </div>
-                    <div className="flex-1">
-                      {format(parseISO(task.startDate), "MMM d")} - {format(parseISO(task.endDate), "MMM d")}
+                      {differenceInDays(parseISO(task.endDate), parseISO(task.startDate)) + 1} days
+                      <span className="ml-4">
+                        {format(parseISO(task.startDate), "MMM d")} - {format(parseISO(task.endDate), "MMM d")}
+                      </span>
                     </div>
                   </div>
                 </div>

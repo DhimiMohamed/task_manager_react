@@ -12,7 +12,7 @@ import { Plus, Crown, User, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 
-import { TeamMembership, TeamMembershipRoleEnum } from "@/api/models/team-membership";
+import { TeamMembershipRoleEnum } from "@/api/models/team-membership";
 import { useTeamMembers, useUpdateTeamMember, useAddTeamMember } from "@/hooks/useTeams";
 
 interface Member {

@@ -1,10 +1,13 @@
-"use client"
-
+// src\components\teams\team-list.tsx
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { useTeams } from "@/hooks/useTeams"
+import { useTeams, useDeleteTeam } from "@/hooks/useTeams"
+
+interface TeamListProps {
+  teams?: any[];
+}
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import {
   AlertDialog,
@@ -17,30 +20,41 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { Users, FolderOpen, MoreHorizontal, Settings, Trash2, UserPlus, Crown } from "lucide-react"
-import { cn } from "@/lib/utils"
 import { format, parseISO } from "date-fns"
 import MemberManagement from "./member-management"
 
-  
+export default function TeamList({ teams: propTeams }: TeamListProps) {
+  // If teams are passed as props, use them; otherwise, fetch with useTeams
+  const { data: fetchedTeams, isLoading, isError } = useTeams();
+  const teams = propTeams ?? fetchedTeams;
 
-
-
-export default function TeamList() {
-  const { data: teams, isLoading, isError } = useTeams();
   const [selectedTeam, setSelectedTeam] = useState<any | null>(null);
   const [deleteTeamId, setDeleteTeamId] = useState<number | null>(null);
+  const {
+    mutate: deleteTeam,
+    isPending: isDeleting
+  } = useDeleteTeam();
 
-  // Placeholder for delete handler (should be replaced with mutation)
   const handleDelete = () => {
-    // TODO: Call delete mutation here
-    setDeleteTeamId(null);
+    if (deleteTeamId == null) return;
+    deleteTeam(deleteTeamId, {
+      onSuccess: () => {
+        setDeleteTeamId(null);
+      },
+      onError: () => {
+        // Optionally show error feedback
+        setDeleteTeamId(null);
+      }
+    });
   };
 
-  if (isLoading) {
-    return <div>Loading teams...</div>;
-  }
-  if (isError) {
-    return <div>Failed to load teams.</div>;
+  if (!propTeams) {
+    if (isLoading) {
+      return <div>Loading teams...</div>;
+    }
+    if (isError) {
+      return <div>Failed to load teams.</div>;
+    }
   }
   if (!teams || teams.length === 0) {
     return <div>No teams found.</div>;
@@ -72,11 +86,11 @@ export default function TeamList() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => setSelectedTeam(team)}>
+                    <DropdownMenuItem onSelect={() => {requestAnimationFrame(() => {setSelectedTeam(team)})}}>
                       <UserPlus className="h-4 w-4 mr-2" />
                       Manage Members
                     </DropdownMenuItem>
-                    {team.is_admin === "true" && (
+                    {team.is_admin === true && (
                       <>
                         <DropdownMenuItem>
                           <Settings className="h-4 w-4 mr-2" />
@@ -84,7 +98,7 @@ export default function TeamList() {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-red-600 focus:text-red-600"
-                          onClick={() => setDeleteTeamId(team.id)}
+                          onSelect={() => {requestAnimationFrame(() => {setDeleteTeamId(team.id)})}}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Delete Team
@@ -153,8 +167,8 @@ export default function TeamList() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-              Delete Team
+            <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700" disabled={isDeleting}>
+              {isDeleting ? "Deleting..." : "Delete Team"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

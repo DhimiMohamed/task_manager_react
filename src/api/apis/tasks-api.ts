@@ -32,6 +32,10 @@ import type { RecurringTask } from '../models';
 // @ts-ignore
 import type { Task } from '../models';
 // @ts-ignore
+import type { TasksChatAgentCreate400Response } from '../models';
+// @ts-ignore
+import type { TasksChatAgentCreate502Response } from '../models';
+// @ts-ignore
 import type { TasksExtractTaskDetailsCreate200Response } from '../models';
 // @ts-ignore
 import type { TasksExtractTaskDetailsCreateRequest } from '../models';
@@ -567,6 +571,49 @@ export const TasksApiAxiosParamCreator = function (configuration?: Configuration
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Process an audio file through the AI agent
+         * @param {File} file Audio file to process
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tasksChatAgentCreate: async (file: File, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'file' is not null or undefined
+            assertParamExists('tasksChatAgentCreate', 'file', file)
+            const localVarPath = `/tasks/chat-agent/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+            const localVarFormParams = new ((configuration && configuration.formDataCtor) || FormData)();
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+            if (file !== undefined) { 
+                localVarFormParams.append('file', file as any);
+            }
+    
+    
+            localVarHeaderParameter['Content-Type'] = 'multipart/form-data';
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = localVarFormParams;
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -1547,6 +1594,18 @@ export const TasksApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Process an audio file through the AI agent
+         * @param {File} file Audio file to process
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async tasksChatAgentCreate(file: File, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.tasksChatAgentCreate(file, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['TasksApi.tasksChatAgentCreate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 
          * @param {string} taskId 
          * @param {Comment} data 
@@ -1941,6 +2000,15 @@ export const TasksApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.tasksCategoriesUpdate(id, data, options).then((request) => request(axios, basePath));
         },
         /**
+         * Process an audio file through the AI agent
+         * @param {File} file Audio file to process
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        tasksChatAgentCreate(file: File, options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.tasksChatAgentCreate(file, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 
          * @param {string} taskId 
          * @param {Comment} data 
@@ -2297,6 +2365,17 @@ export class TasksApi extends BaseAPI {
      */
     public tasksCategoriesUpdate(id: string, data: Category, options?: RawAxiosRequestConfig) {
         return TasksApiFp(this.configuration).tasksCategoriesUpdate(id, data, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Process an audio file through the AI agent
+     * @param {File} file Audio file to process
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof TasksApi
+     */
+    public tasksChatAgentCreate(file: File, options?: RawAxiosRequestConfig) {
+        return TasksApiFp(this.configuration).tasksChatAgentCreate(file, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

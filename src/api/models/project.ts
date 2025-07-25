@@ -79,7 +79,7 @@ export interface Project {
      * @type {string}
      * @memberof Project
      */
-    'created_by_username'?: string;
+    'created_by_email'?: string;
     /**
      * 
      * @type {string}

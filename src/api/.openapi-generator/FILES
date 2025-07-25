@@ -38,6 +38,8 @@ models/project.ts
 models/recurring-task.ts
 models/reminder.ts
 models/task.ts
+models/tasks-chat-agent-create400-response.ts
+models/tasks-chat-agent-create502-response.ts
 models/tasks-extract-task-details-create-request.ts
 models/tasks-extract-task-details-create200-response.ts
 models/tasks-stats-list200-response-categories-inner.ts

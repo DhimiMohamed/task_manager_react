@@ -22,6 +22,8 @@ export * from './project';
 export * from './recurring-task';
 export * from './reminder';
 export * from './task';
+export * from './tasks-chat-agent-create400-response';
+export * from './tasks-chat-agent-create502-response';
 export * from './tasks-extract-task-details-create200-response';
 export * from './tasks-extract-task-details-create-request';
 export * from './tasks-stats-list200-response';

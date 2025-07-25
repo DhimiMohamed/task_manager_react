@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { MessageCircle, Send, Bot, X, Minimize2, Maximize2 } from "lucide-react"
+import { Separator } from "@/components/ui/separator"
+import { MessageCircle, Send, Bot, X, Minimize2, Maximize2, Mic } from "lucide-react"
 import { cn } from "@/lib/utils"
 import ChatMessage from "./chat-message"
 import VoiceInput from "./voice-input"
+import VoiceUI from "./VoiceUI"
 import { AIAssistantApi } from "@/api/apis/aiassistant-api"
 import { AiTaskAssistantRequest } from "@/api/models/ai-task-assistant-request"
 import { AiTaskAssistant200Response } from "@/api/models/ai-task-assistant200-response"
@@ -45,6 +47,7 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
   const [isMinimized, setIsMinimized] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isVoiceMode, setIsVoiceMode] = useState(false)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -155,6 +158,7 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
           className,
         )}
       >
+        {/* Header */}
         <div
           className={cn(
             "flex items-center justify-between border-b",
@@ -176,6 +180,14 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
                 {isMinimized ? <Maximize2 className="h-4 w-4" /> : <Minimize2 className="h-4 w-4" />}
               </Button>
             )}
+            <Button
+              variant={isVoiceMode ? "default" : "ghost"}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setIsVoiceMode(!isVoiceMode)}
+            >
+              <Mic className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onToggle}>
               <X className="h-4 w-4" />
             </Button>
@@ -184,68 +196,81 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
 
         {(!isMinimized || isMobile) && (
           <>
-            <div className="flex-1 overflow-hidden">
-              <ScrollArea className="h-full" ref={scrollAreaRef}>
-                <div className="space-y-4 p-4">
-                  {messages.map((message) => (
-                    <div key={message.id}>
-                      <ChatMessage message={message} isMobile={isMobile} />
-                      {message.details && message.details.length > 0 && (
-                        <div className="mt-2 pl-10">
-                          <div className="text-sm text-muted-foreground">
-                            <ul className="list-disc pl-4 space-y-1">
-                              {message.details.map((detail, index) => (
-                                <li key={index}>{detail}</li>
-                              ))}
-                            </ul>
+            {isVoiceMode ? (
+              <VoiceUI 
+                isMobile={isMobile}
+                // onResponse={handleVoiceInput}
+              />
+            ) : (
+              <>
+                {/* Chat Messages */}
+                <div className="flex-1 overflow-hidden">
+                  <ScrollArea className="h-full" ref={scrollAreaRef}>
+                    <div className="space-y-4 p-4">
+                      {messages.map((message) => (
+                        <div key={message.id}>
+                          <ChatMessage message={message} isMobile={isMobile} />
+                          {message.details && message.details.length > 0 && (
+                            <div className="mt-2 pl-10">
+                              <div className="text-sm text-muted-foreground">
+                                <ul className="list-disc pl-4 space-y-1">
+                                  {message.details.map((detail, index) => (
+                                    <li key={index}>{detail}</li>
+                                  ))}
+                                </ul>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      {isProcessing && (
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                            <Bot className="h-3 w-3 text-white" />
+                          </div>
+                          <div className="flex space-x-1">
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                            <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
                           </div>
                         </div>
                       )}
+                      <div ref={messagesEndRef} />
                     </div>
-                  ))}
-                  {isProcessing && (
-                    <div className="flex items-center space-x-2 text-muted-foreground">
-                      <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <Bot className="h-3 w-3 text-white" />
-                      </div>
-                      <div className="flex space-x-1">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                      </div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
+                  </ScrollArea>
                 </div>
-              </ScrollArea>
-            </div>
 
-            <div className={cn("border-t bg-background", isMobile ? "p-4 pb-safe-area-inset-bottom" : "p-4")}>
-              <div className="flex items-center space-x-2">
-                <div className="flex-1 relative">
-                  <Input
-                    ref={inputRef}
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    placeholder={isMobile ? "Type or speak..." : "Type or speak your command..."}
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                    className={cn("pr-12", isMobile && "h-12 text-base")}
-                  />
-                  <VoiceInput
-                    onResponse={handleVoiceInput}
-                    isMobile={isMobile}
-                  />
+                <Separator />
+
+                {/* Input Area */}
+                <div className={cn("border-t bg-background", isMobile ? "p-4 pb-safe-area-inset-bottom" : "p-4")}>
+                  <div className="flex items-center space-x-2">
+                    <div className="flex-1 relative">
+                      <Input
+                        ref={inputRef}
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        placeholder={isMobile ? "Type or speak..." : "Type or speak your command..."}
+                        onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                        className={cn("pr-12", isMobile && "h-12 text-base")}
+                      />
+                      <VoiceInput
+                        onResponse={handleVoiceInput}
+                        isMobile={isMobile}
+                      />
+                    </div>
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!inputValue.trim() || isProcessing}
+                      size="icon"
+                      className={cn(isMobile ? "h-12 w-12" : "h-10 w-10")}
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!inputValue.trim() || isProcessing}
-                  size="icon"
-                  className={cn(isMobile ? "h-12 w-12" : "h-10 w-10")}
-                >
-                  <Send className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+              </>
+            )}
           </>
         )}
       </Card>

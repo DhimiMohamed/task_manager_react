@@ -1,4 +1,4 @@
-
+// src\pages\ProjectProposalPage.tsx
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -8,6 +8,11 @@ import { Sparkles, Loader2, ArrowRight, ArrowLeft, Home } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import TeamSelector from "@/components/projects/team-selector"
 import AIProjectProposal from "@/components/projects/ai-project-proposal"
+import { ProjectsApi } from "@/api/apis/projects-api"
+import { ProjectsGenerateProposalCreateRequest } from "@/api/models/projects-generate-proposal-create-request"
+import { ProjectsGenerateProposalCreate200Response } from "@/api/models/projects-generate-proposal-create200-response"
+import { toast } from "sonner"
+import customAxios from "@/lib/customAxios"
 
 export interface TeamMember {
   id: string
@@ -21,21 +26,33 @@ export interface TeamMember {
   status: "active" | "pending" | "inactive"
 }
 
+interface ProjectTask {
+  id: string
+  title: string
+  description: string
+  assignedTo: string
+  assignedToEmail: string
+  priority: "low" | "medium" | "high"
+  estimatedHours: number
+  dependencies: string[]
+  skillsRequired: string[]
+}
+
+interface ProjectPhase {
+  id: string
+  name: string
+  description: string
+  duration: string
+  tasks: ProjectTask[]
+}
+
 interface ProjectProposal {
   name: string
   description: string
   deadline: string
   priority: "low" | "medium" | "high"
   estimatedDuration: string
-  tasks: {
-    id: string
-    title: string
-    description: string
-    assignedTo: string
-    priority: "low" | "medium" | "high"
-    estimatedHours: number
-    dependencies: string[]
-  }[]
+  phases: ProjectPhase[]
   milestones: {
     id: string
     title: string
@@ -43,6 +60,12 @@ interface ProjectProposal {
     dueDate: string
     tasks: string[]
   }[]
+  resourceRequirements: string[]
+  riskAssessment: {
+    risk: string
+    mitigation: string
+  }[]
+  successMetrics: string[]
 }
 
 const steps = [
@@ -51,116 +74,115 @@ const steps = [
   { id: 3, title: "Review Proposal", description: "Review and modify AI suggestions" },
 ]
 
+// Transform API response to internal format
+const transformAPIResponse = (apiResponse: ProjectsGenerateProposalCreate200Response): ProjectProposal => {
+  const phases: ProjectPhase[] = apiResponse.proposal?.phases?.map((phase: any, phaseIndex: number) => ({
+    id: `phase-${phaseIndex + 1}`,
+    name: phase.phase_name || `Phase ${phaseIndex + 1}`,
+    description: phase.description || '',
+    duration: phase.duration || '',
+    tasks: phase.tasks?.map((task: any, taskIndex: number) => ({
+      id: `task-${phaseIndex + 1}-${taskIndex + 1}`,
+      title: task.task_name || `Task ${taskIndex + 1}`,
+      description: task.description || '',
+      assignedTo: task.assigned_to || '',
+      assignedToEmail: task.assigned_to_email || '',
+      priority: (task.priority?.toLowerCase() || 'medium') as "low" | "medium" | "high",
+      estimatedHours: parseInt(task.estimated_hours) || 0,
+      dependencies: [],
+      skillsRequired: task.skills_required || []
+    })) || []
+  })) || []
+
+  // Generate milestones from phases
+  const milestones = phases.map((phase, index) => ({
+    id: `milestone-${index + 1}`,
+    title: `${phase.name} Complete`,
+    description: `Completion of ${phase.name} phase`,
+    dueDate: new Date(Date.now() + (index + 1) * 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
+    tasks: phase.tasks.map(task => task.id)
+  }))
+
+  return {
+    name: apiResponse.proposal?.project_name || 'Untitled Project',
+    description: apiResponse.proposal?.description || '',
+    deadline: new Date(Date.now() + 12 * 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0], // 12 weeks from now
+    priority: "medium",
+    estimatedDuration: apiResponse.proposal?.estimated_duration || '',
+    phases,
+    milestones,
+    resourceRequirements: apiResponse.proposal?.resource_requirements || [],
+    riskAssessment: apiResponse.proposal?.risk_assessment?.map((item: any) => ({
+      risk: item.risk || '',
+      mitigation: item.mitigation || ''
+    })) || [],
+    successMetrics: apiResponse.proposal?.success_metrics || []
+  }
+}
+
 export default function CreateAIProjectPage() {
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState(1)
   const [projectDescription, setProjectDescription] = useState("")
   const [selectedTeam, setSelectedTeam] = useState<TeamMember[]>([])
+  const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [proposal, setProposal] = useState<ProjectProposal | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  const projectsApi = new ProjectsApi(undefined,undefined,customAxios)
 
   const handleGenerateProposal = async () => {
-    if (!projectDescription.trim() || selectedTeam.length === 0) return
+    if (!projectDescription.trim() || selectedTeam.length === 0 || !selectedTeamId) {
+      toast.error("Please provide project description and select team members.")
+      return
+    }
 
     setIsGenerating(true)
+    setError(null)
 
-    // Simulate AI processing
-    setTimeout(() => {
-      const aiProposal: ProjectProposal = {
-        name: "AI-Generated Project",
-        description: projectDescription,
-        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-        priority: "medium",
-        estimatedDuration: "4-6 weeks",
-        tasks: [
-          {
-            id: "1",
-            title: "Project Planning & Requirements",
-            description: "Define project scope, requirements, and create initial documentation",
-            assignedTo: selectedTeam[0]?.id || "",
-            priority: "high",
-            estimatedHours: 16,
-            dependencies: [],
-          },
-          {
-            id: "2",
-            title: "Design & Architecture",
-            description: "Create system design, wireframes, and technical architecture",
-            assignedTo: selectedTeam[1]?.id || selectedTeam[0]?.id || "",
-            priority: "high",
-            estimatedHours: 24,
-            dependencies: ["1"],
-          },
-          {
-            id: "3",
-            title: "Core Development",
-            description: "Implement main features and functionality",
-            assignedTo: selectedTeam[2]?.id || selectedTeam[0]?.id || "",
-            priority: "medium",
-            estimatedHours: 40,
-            dependencies: ["2"],
-          },
-          {
-            id: "4",
-            title: "Testing & Quality Assurance",
-            description: "Comprehensive testing, bug fixes, and quality assurance",
-            assignedTo: selectedTeam[3]?.id || selectedTeam[1]?.id || "",
-            priority: "medium",
-            estimatedHours: 20,
-            dependencies: ["3"],
-          },
-          {
-            id: "5",
-            title: "Deployment & Launch",
-            description: "Deploy to production and handle launch activities",
-            assignedTo: selectedTeam[0]?.id || "",
-            priority: "high",
-            estimatedHours: 12,
-            dependencies: ["4"],
-          },
-        ],
-        milestones: [
-          {
-            id: "1",
-            title: "Project Kickoff",
-            description: "Project planning completed and team aligned",
-            dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-            tasks: ["1"],
-          },
-          {
-            id: "2",
-            title: "Design Complete",
-            description: "All designs and architecture finalized",
-            dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-            tasks: ["2"],
-          },
-          {
-            id: "3",
-            title: "Development Complete",
-            description: "Core functionality implemented and ready for testing",
-            dueDate: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-            tasks: ["3"],
-          },
-          {
-            id: "4",
-            title: "Project Launch",
-            description: "Project tested, deployed, and launched successfully",
-            dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-            tasks: ["4", "5"],
-          },
-        ],
+    try {
+      const requestData: ProjectsGenerateProposalCreateRequest = {
+        team_id: selectedTeamId,
+        member_ids: selectedTeam.map(member => parseInt(member.id)),
+        project_requirements: projectDescription
       }
 
-      setProposal(aiProposal)
+      const response = await projectsApi.projectsGenerateProposalCreate(requestData)
+      
+      if (response.data && response.data.success) {
+        const transformedProposal = transformAPIResponse(response.data)
+        setProposal(transformedProposal)
+        setCurrentStep(3)
+        
+        toast.success("AI has successfully generated your project proposal.")
+      } else {
+        throw new Error(response.data?.validation?.errors?.join(", ") || "Failed to generate proposal")
+      }
+    } catch (err: any) {
+      console.error("Error generating proposal:", err)
+      const errorMessage = err.response?.data?.message || err.message || "Failed to generate project proposal"
+      setError(errorMessage)
+      
+      toast.error(errorMessage)
+    } finally {
       setIsGenerating(false)
-      setCurrentStep(3)
-    }, 3000)
+    }
   }
 
-  const handleSubmitProject = (finalProposal: ProjectProposal) => {
-    // Here you would normally save the project
-    console.log("Creating project:", finalProposal)
-    navigate("/projects")
+  const handleSubmitProject = async (finalProposal: ProjectProposal) => {
+    try {
+      // Here you would call your project creation API
+      console.log("Creating project:", finalProposal)
+      
+      // For now, just navigate back
+      toast.success(`${finalProposal.name} has been created successfully.`)
+      
+      navigate("/projects")
+    } catch (err: any) {
+      console.error("Error creating project:", err)
+      toast.error("Failed to create project. Please try again.")
+    }
   }
 
   const handleNext = () => {
@@ -173,6 +195,7 @@ export default function CreateAIProjectPage() {
 
   const handleBack = () => {
     setCurrentStep(currentStep - 1)
+    setError(null)
   }
 
   const canProceed = () => {
@@ -180,12 +203,18 @@ export default function CreateAIProjectPage() {
       case 1:
         return projectDescription.trim().length > 0
       case 2:
-        return selectedTeam.length > 0
+        return selectedTeam.length > 0 && selectedTeamId !== null
       case 3:
         return proposal !== null
       default:
         return false
     }
+  }
+
+  // Update team selection handler
+  const handleTeamSelectionChange = (team: TeamMember[], teamId: number | null) => {
+    setSelectedTeam(team)
+    setSelectedTeamId(teamId)
   }
 
   return (
@@ -240,6 +269,21 @@ export default function CreateAIProjectPage() {
         </CardContent>
       </Card>
 
+      {/* Error Display */}
+      {error && (
+        <Card className="border-destructive">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-destructive">
+              <div className="h-4 w-4 rounded-full bg-destructive flex items-center justify-center">
+                <span className="text-xs text-destructive-foreground">!</span>
+              </div>
+              <p className="text-sm font-medium">Error generating proposal</p>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">{error}</p>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Step Content */}
       <div className="min-h-[600px]">
         {currentStep === 1 && (
@@ -277,7 +321,11 @@ export default function CreateAIProjectPage() {
         )}
 
         {currentStep === 2 && (
-          <TeamSelector selectedTeam={selectedTeam} onTeamChange={setSelectedTeam} isGenerating={isGenerating} />
+          <TeamSelector 
+            selectedTeam={selectedTeam} 
+            onTeamChange={handleTeamSelectionChange}
+            isGenerating={isGenerating} 
+          />
         )}
 
         {currentStep === 3 && proposal && (
@@ -294,13 +342,13 @@ export default function CreateAIProjectPage() {
       <Card>
         <CardContent className="p-4">
           <div className="flex justify-between">
-            <Button variant="outline" onClick={handleBack} disabled={currentStep === 1}>
+            <Button variant="outline" onClick={handleBack} disabled={currentStep === 1 || isGenerating}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back
             </Button>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => navigate("/projects")}>
+              <Button variant="outline" onClick={() => navigate("/projects")} disabled={isGenerating}>
                 Cancel
               </Button>
               {currentStep < 3 ? (

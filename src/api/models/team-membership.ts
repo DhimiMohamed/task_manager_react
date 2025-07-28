@@ -74,6 +74,18 @@ export interface TeamMembership {
      * @memberof TeamMembership
      */
     'joined_at'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TeamMembership
+     */
+    'skills'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof TeamMembership
+     */
+    'experience'?: string;
 }
 
 export const TeamMembershipRoleEnum = {

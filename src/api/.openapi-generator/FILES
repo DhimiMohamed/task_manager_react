@@ -35,6 +35,12 @@ models/index.ts
 models/notification.ts
 models/profile.ts
 models/project.ts
+models/projects-generate-proposal-create-request.ts
+models/projects-generate-proposal-create200-response-proposal.ts
+models/projects-generate-proposal-create200-response-team-data-members-inner.ts
+models/projects-generate-proposal-create200-response-team-data.ts
+models/projects-generate-proposal-create200-response-validation.ts
+models/projects-generate-proposal-create200-response.ts
 models/recurring-task.ts
 models/reminder.ts
 models/task.ts

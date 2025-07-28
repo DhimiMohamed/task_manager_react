@@ -23,6 +23,10 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError, operationServerMap } from '../base';
 // @ts-ignore
 import type { Project } from '../models';
+// @ts-ignore
+import type { ProjectsGenerateProposalCreate200Response } from '../models';
+// @ts-ignore
+import type { ProjectsGenerateProposalCreateRequest } from '../models';
 /**
  * ProjectsApi - axios parameter creator
  * @export
@@ -97,6 +101,44 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             setSearchParams(localVarUrlObj, localVarQueryParameter);
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Generate a project proposal for a team
+         * @param {ProjectsGenerateProposalCreateRequest} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        projectsGenerateProposalCreate: async (data: ProjectsGenerateProposalCreateRequest, options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'data' is not null or undefined
+            assertParamExists('projectsGenerateProposalCreate', 'data', data)
+            const localVarPath = `/projects/generate-proposal/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(data, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -196,6 +238,38 @@ export const ProjectsApiAxiosParamCreator = function (configuration?: Configurat
             }
 
             const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication Bearer required
+            await setApiKeyToObject(localVarHeaderParameter, "Authorization", configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        projectsTeamMemberSkillsCreate: async (options: RawAxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/projects/team-member-skills/`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
             const localVarHeaderParameter = {} as any;
             const localVarQueryParameter = {} as any;
 
@@ -326,6 +400,18 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
+         * Generate a project proposal for a team
+         * @param {ProjectsGenerateProposalCreateRequest} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async projectsGenerateProposalCreate(data: ProjectsGenerateProposalCreateRequest, options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ProjectsGenerateProposalCreate200Response>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.projectsGenerateProposalCreate(data, options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ProjectsApi.projectsGenerateProposalCreate']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
          * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -359,6 +445,17 @@ export const ProjectsApiFp = function(configuration?: Configuration) {
             const localVarAxiosArgs = await localVarAxiosParamCreator.projectsRead(id, options);
             const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
             const localVarOperationServerBasePath = operationServerMap['ProjectsApi.projectsRead']?.[localVarOperationServerIndex]?.url;
+            return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async projectsTeamMemberSkillsCreate(options?: RawAxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.projectsTeamMemberSkillsCreate(options);
+            const localVarOperationServerIndex = configuration?.serverIndex ?? 0;
+            const localVarOperationServerBasePath = operationServerMap['ProjectsApi.projectsTeamMemberSkillsCreate']?.[localVarOperationServerIndex]?.url;
             return (axios, basePath) => createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration)(axios, localVarOperationServerBasePath || basePath);
         },
         /**
@@ -415,6 +512,15 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
             return localVarFp.projectsDelete(id, options).then((request) => request(axios, basePath));
         },
         /**
+         * Generate a project proposal for a team
+         * @param {ProjectsGenerateProposalCreateRequest} data 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        projectsGenerateProposalCreate(data: ProjectsGenerateProposalCreateRequest, options?: RawAxiosRequestConfig): AxiosPromise<ProjectsGenerateProposalCreate200Response> {
+            return localVarFp.projectsGenerateProposalCreate(data, options).then((request) => request(axios, basePath));
+        },
+        /**
          * 
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
@@ -440,6 +546,14 @@ export const ProjectsApiFactory = function (configuration?: Configuration, baseP
          */
         projectsRead(id: string, options?: RawAxiosRequestConfig): AxiosPromise<Project> {
             return localVarFp.projectsRead(id, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        projectsTeamMemberSkillsCreate(options?: RawAxiosRequestConfig): AxiosPromise<void> {
+            return localVarFp.projectsTeamMemberSkillsCreate(options).then((request) => request(axios, basePath));
         },
         /**
          * List all projects for a specific team
@@ -493,6 +607,17 @@ export class ProjectsApi extends BaseAPI {
     }
 
     /**
+     * Generate a project proposal for a team
+     * @param {ProjectsGenerateProposalCreateRequest} data 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProjectsApi
+     */
+    public projectsGenerateProposalCreate(data: ProjectsGenerateProposalCreateRequest, options?: RawAxiosRequestConfig) {
+        return ProjectsApiFp(this.configuration).projectsGenerateProposalCreate(data, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * 
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
@@ -523,6 +648,16 @@ export class ProjectsApi extends BaseAPI {
      */
     public projectsRead(id: string, options?: RawAxiosRequestConfig) {
         return ProjectsApiFp(this.configuration).projectsRead(id, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ProjectsApi
+     */
+    public projectsTeamMemberSkillsCreate(options?: RawAxiosRequestConfig) {
+        return ProjectsApiFp(this.configuration).projectsTeamMemberSkillsCreate(options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

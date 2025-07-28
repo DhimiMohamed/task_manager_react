@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { useCallback } from "react"
-import { PlusCircle, Search, Calendar, AlertTriangle, Grid3X3, List, Star, Users } from "lucide-react"
+import { PlusCircle, Search, Calendar, AlertTriangle, Grid3X3, List, Star, Users, Sparkles } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format, isAfter, isBefore, addDays, parseISO } from "date-fns"
 import ProjectForm from "@/components/projects/project-form"
@@ -136,9 +136,10 @@ export default function ProjectsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Projects</h1>
           <p className="text-muted-foreground">Manage and track all your projects</p>
         </div>
+        <div className="flex gap-2">
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="flex items-center gap-2">
+            <Button variant="outline" className="flex items-center gap-2 bg-transparent">
               <PlusCircle className="h-4 w-4" />
               New Project
             </Button>
@@ -150,6 +151,11 @@ export default function ProjectsPage() {
             <ProjectForm onSuccess={handleProjectCreated} />
           </DialogContent>
         </Dialog>
+        <Button className="flex items-center gap-2" onClick={() => (window.location.href = "/projects/create-ai")}>
+            <Sparkles className="h-4 w-4" />
+            Create with AI
+          </Button>
+        </div>
       </div>
 
       {/* Filters and Search */}

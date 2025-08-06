@@ -53,5 +53,11 @@ export interface Profile {
      * @memberof Profile
      */
     'location'?: string | null;
+    /**
+     * 
+     * @type {string}
+     * @memberof Profile
+     */
+    'profile_picture'?: string | null;
 }
 

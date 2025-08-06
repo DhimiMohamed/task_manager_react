@@ -461,16 +461,16 @@ export default function AIProjectProposal({
                                               <Avatar className="h-6 w-6">
                                                 <AvatarImage
                                                   src={assignedMember.avatar || "/placeholder.svg"}
-                                                  alt={assignedMember.name}
+                                                  alt={assignedMember.email}
                                                 />
                                                 <AvatarFallback className="text-xs">
-                                                  {assignedMember.name
+                                                  {assignedMember.email
                                                     .split(" ")
                                                     .map((n) => n[0])
                                                     .join("")}
                                                 </AvatarFallback>
                                               </Avatar>
-                                              <span className="text-sm">{assignedMember.name}</span>
+                                              <span className="text-sm">{assignedMember.email}</span>
                                             </div>
                                           )}
                                           <Badge variant="outline" className={getPriorityColor(task.priority)}>

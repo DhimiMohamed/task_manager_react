@@ -18,6 +18,10 @@ import ProjectsPage from './pages/ProjectsPage';
 import ProjectDetailPage from './pages/ProjectDetailPage';
 import TeamsPage from './pages/TeamsPage';
 import ProjectProposalPage from './pages/ProjectProposalPage';
+import ProfilePage from './pages/ProfilePage';
+import SignupPage from './pages/SignupPage';
+import LoginPage from './pages/LoginPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 function App() {
   return (
@@ -25,7 +29,10 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/register" element={<RegistrationForm />} />
+        <Route path="/signup" element={<SignupPage />} />
         <Route path="/login" element={<LoginForm />} />
+        <Route path="/signin" element={<LoginPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/email-verified" element={<EmailVerifiedSuccess />} />
         {/* ... other public routes */}
@@ -67,6 +74,7 @@ function LayoutWithSidebar() {
           <Route path="projects/:id" element={<ProjectDetailPage />} />
           <Route path="projects/create-ai" element={<ProjectProposalPage />} />
           <Route path="teams" element={<TeamsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="categories" element={<CategoriesPage />} />
           {/* <Route path="tasks" element={<Tasks />} /> */}
           <Route path="tasks" element={<TasksPage />} />

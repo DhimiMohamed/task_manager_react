@@ -218,7 +218,7 @@ export default function CreateAIProjectPage() {
   }
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto py-3 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -241,7 +241,7 @@ export default function CreateAIProjectPage() {
 
       {/* Progress Steps */}
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-3">
           <div className="flex items-center justify-between">
             {steps.map((step, index) => (
               <div key={step.id} className="flex items-center">
@@ -302,7 +302,7 @@ export default function CreateAIProjectPage() {
                   placeholder="E.g., I want to create a mobile app for task management with real-time collaboration features. The app should have user authentication, project creation, task assignment, and notification system..."
                   value={projectDescription}
                   onChange={(e) => setProjectDescription(e.target.value)}
-                  className="min-h-40 resize-none"
+                  className="min-h-20 resize-none"
                 />
                 <p className="text-xs text-muted-foreground">{projectDescription.length}/1000 characters</p>
               </div>

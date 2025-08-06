@@ -94,7 +94,7 @@ export default function TeamSelector({ selectedTeam, onTeamChange, isGenerating 
   if (teamsLoading) {
     return (
       <Card>
-        <CardContent className="p-6 text-center">
+        <CardContent className="p-3 text-center">
           <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading teams...</p>
         </CardContent>
@@ -106,7 +106,7 @@ export default function TeamSelector({ selectedTeam, onTeamChange, isGenerating 
   if (teamsError) {
     return (
       <Card className="border-destructive">
-        <CardContent className="p-6 text-center">
+        <CardContent className="p-3 text-center">
           <div className="text-destructive mb-4">
             <X className="h-8 w-8 mx-auto mb-2" />
             <p className="font-medium">Failed to load teams</p>
@@ -118,7 +118,7 @@ export default function TeamSelector({ selectedTeam, onTeamChange, isGenerating 
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Team Selection */}
       <Card>
         <CardHeader>
@@ -170,16 +170,16 @@ export default function TeamSelector({ selectedTeam, onTeamChange, isGenerating 
                 <div key={member.id} className="flex items-center justify-between p-3 border rounded-lg bg-muted/50">
                   <div className="flex items-center gap-3">
                     <Avatar className="h-10 w-10">
-                      <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.name} />
+                      <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.email} />
                       <AvatarFallback>
-                        {member.name
+                        {member.email
                           .split(" ")
                           .map((n) => n[0])
                           .join("")}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{member.name}</p>
+                      <p className="font-medium">{member.email}</p>
                       <p className="text-sm text-muted-foreground">{member.department}</p>
                       {member.skills.length > 0 && (
                         <div className="flex flex-wrap gap-1 mt-1">
@@ -268,9 +268,9 @@ export default function TeamSelector({ selectedTeam, onTeamChange, isGenerating 
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3 flex-1">
                             <Avatar className="h-12 w-12">
-                              <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.name} />
+                              <AvatarImage src={member.avatar || "/placeholder.svg"} alt={member.email} />
                               <AvatarFallback>
-                                {member.name
+                                {member.email
                                   .split(" ")
                                   .map((n) => n[0])
                                   .join("")}
@@ -278,7 +278,7 @@ export default function TeamSelector({ selectedTeam, onTeamChange, isGenerating 
                             </Avatar>
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <p className="font-medium">{member.name}</p>
+                                <p className="font-medium">{member.email}</p>
                                 <Badge variant="outline" className={getRoleColor(member.role)}>
                                   {member.role}
                                 </Badge>

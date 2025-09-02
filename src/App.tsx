@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import RegistrationForm from './components/RegistrationForm';
 import VerifyEmailPage from './components/VerifyEmailPage';
 import EmailVerifiedSuccess from './components/EmailVerifiedSuccess';
-import LoginForm from './components/LoginForm';
+// import LoginForm from './components/LoginForm';
 import Dashboard from './pages/Dashboard';
 // import Tasks from './components/Test';
 import ProtectedRoute from './routes/ProtectedRoute';
@@ -30,8 +30,8 @@ function App() {
         {/* Public routes */}
         <Route path="/register" element={<RegistrationForm />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/login" element={<LoginForm />} />
-        <Route path="/signin" element={<LoginPage />} />
+        {/* <Route path="/login" element={<LoginForm />} /> */}
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
         <Route path="/email-verified" element={<EmailVerifiedSuccess />} />

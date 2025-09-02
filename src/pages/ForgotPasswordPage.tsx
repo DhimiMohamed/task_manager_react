@@ -1,5 +1,4 @@
-"use client"
-
+// src/pages/ForgotPasswordPage.tsx
 import type React from "react"
 
 import { useState } from "react"
@@ -12,8 +11,15 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Progress } from "@/components/ui/progress"
 import { validateEmail, getPasswordStrength, type PasswordStrength } from "@/lib/validation"
 import { ArrowLeft, CheckCircle, Mail, Shield, Key, PartyPopper } from "lucide-react"
+import { AccountsApi } from "@/api/apis/accounts-api"
+import type { AccountsPasswordResetRequestCreateRequest } from "@/api/models/accounts-password-reset-request-create-request"
+import type { AccountsPasswordResetVerifyOtpCreateRequest } from "@/api/models/accounts-password-reset-verify-otp-create-request"
+import type { AccountsPasswordResetResetPasswordCreateRequest } from "@/api/models/accounts-password-reset-reset-password-create-request"
 
 type Step = "email" | "verification" | "code" | "password" | "success"
+
+// Initialize API instance - adjust this based on your API configuration setup
+const accountsApi = new AccountsApi()
 
 export default function ForgotPasswordPage() {
   const [currentStep, setCurrentStep] = useState<Step>("email")
@@ -37,6 +43,9 @@ export default function ForgotPasswordPage() {
     e.preventDefault()
     setIsLoading(true)
 
+    // Clear any previous errors
+    setErrors({})
+
     if (!email) {
       setErrors({ email: "Email is required" })
       setIsLoading(false)
@@ -49,19 +58,45 @@ export default function ForgotPasswordPage() {
       return
     }
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Create the request data
+      const requestData: AccountsPasswordResetRequestCreateRequest = {
+        email: email
+      }
+
+      // Call the API
+      await accountsApi.accountsPasswordResetRequestCreate(requestData)
+
+      // Generate case number for user reference
       const newCaseNumber = generateCaseNumber()
       setCaseNumber(newCaseNumber)
+      
+      // Clear errors and proceed to next step
       setErrors({})
-      setIsLoading(false)
       setCurrentStep("verification")
-    }, 1000)
+    } catch (error: any) {
+      // Handle API errors
+      if (error.response?.status === 400) {
+        setErrors({ email: "Please enter a valid email address" })
+      } else if (error.response?.status === 404) {
+        setErrors({ email: "No account found with this email address" })
+      } else if (error.response?.status === 429) {
+        setErrors({ email: "Too many requests. Please try again later." })
+      } else {
+        setErrors({ email: "An error occurred. Please try again." })
+      }
+      console.error("Password reset request failed:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleCodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
+
+    // Clear any previous errors
+    setErrors({})
 
     if (!verificationCode) {
       setErrors({ code: "Verification code is required" })
@@ -75,12 +110,36 @@ export default function ForgotPasswordPage() {
       return
     }
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Create the request data
+      const requestData: AccountsPasswordResetVerifyOtpCreateRequest = {
+        email: email,
+        otp: verificationCode
+      }
+
+      // Call the API to verify OTP
+      await accountsApi.accountsPasswordResetVerifyOtpCreate(requestData)
+
+      // Clear errors and proceed to next step
       setErrors({})
-      setIsLoading(false)
       setCurrentStep("password")
-    }, 1000)
+    } catch (error: any) {
+      // Handle API errors
+      if (error.response?.status === 400) {
+        setErrors({ code: "Invalid verification code. Please check and try again." })
+      } else if (error.response?.status === 404) {
+        setErrors({ code: "Verification code not found or expired. Please request a new code." })
+      } else if (error.response?.status === 410) {
+        setErrors({ code: "Verification code has expired. Please request a new code." })
+      } else if (error.response?.status === 429) {
+        setErrors({ code: "Too many attempts. Please try again later." })
+      } else {
+        setErrors({ code: "An error occurred. Please try again." })
+      }
+      console.error("OTP verification failed:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -89,12 +148,14 @@ export default function ForgotPasswordPage() {
 
     const newErrors: Record<string, string> = {}
 
+    // Validate new password
     if (!newPassword) {
       newErrors.password = "New password is required"
     } else if (passwordStrength.score < 3) {
       newErrors.password = "Password is too weak. Please choose a stronger password."
     }
 
+    // Validate password confirmation
     if (!confirmPassword) {
       newErrors.confirmPassword = "Please confirm your new password"
     } else if (newPassword !== confirmPassword) {
@@ -104,14 +165,43 @@ export default function ForgotPasswordPage() {
     setErrors(newErrors)
 
     if (Object.keys(newErrors).length === 0) {
-      // Simulate API call
-      setTimeout(() => {
-        setIsLoading(false)
+      try {
+        // Create the request data
+        const requestData: AccountsPasswordResetResetPasswordCreateRequest = {
+          email: email,
+          otp: verificationCode,
+          new_password: newPassword
+        }
+
+        // Call the API to reset password
+        await accountsApi.accountsPasswordResetResetPasswordCreate(requestData)
+
+        // Clear errors and proceed to success step
+        setErrors({})
         setCurrentStep("success")
-      }, 1000)
-    } else {
-      setIsLoading(false)
+      } catch (error: any) {
+        // Handle API errors
+        if (error.response?.status === 400) {
+          const errorMessage = error.response?.data?.message || "Invalid request. Please check your information and try again."
+          setErrors({ password: errorMessage })
+        } else if (error.response?.status === 404) {
+          setErrors({ password: "Verification code not found or expired. Please start the process again." })
+        } else if (error.response?.status === 410) {
+          setErrors({ password: "Verification code has expired. Please request a new code." })
+        } else if (error.response?.status === 422) {
+          // Handle validation errors from server
+          const errorMessage = error.response?.data?.message || "Password does not meet requirements."
+          setErrors({ password: errorMessage })
+        } else if (error.response?.status === 429) {
+          setErrors({ password: "Too many attempts. Please try again later." })
+        } else {
+          setErrors({ password: "An error occurred while resetting your password. Please try again." })
+        }
+        console.error("Password reset failed:", error)
+      }
     }
+    
+    setIsLoading(false)
   }
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,6 +258,11 @@ export default function ForgotPasswordPage() {
     }
   }
 
+  // Handle resend functionality
+  const handleResendCode = async () => {
+    await handleEmailSubmit(new Event('submit') as any)
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="w-full max-w-md">
@@ -210,12 +305,6 @@ export default function ForgotPasswordPage() {
           {currentStep === "verification" && (
             <div className="space-y-4">
               <div className="text-center space-y-4">
-                <div className="p-4 bg-blue-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">Case Number for Reference:</p>
-                  <p className="font-mono text-lg font-bold text-blue-600">{caseNumber}</p>
-                  <p className="text-xs text-gray-500 mt-2">Save this case number for your records</p>
-                </div>
-
                 <Alert>
                   <Mail className="h-4 w-4" />
                   <AlertDescription>
@@ -230,7 +319,7 @@ export default function ForgotPasswordPage() {
 
               <Button
                 variant="outline"
-                onClick={handleEmailSubmit}
+                onClick={handleResendCode}
                 className="w-full bg-transparent"
                 disabled={isLoading}
               >
@@ -260,10 +349,6 @@ export default function ForgotPasswordPage() {
                     <AlertDescription>{errors.code}</AlertDescription>
                   </Alert>
                 )}
-              </div>
-
-              <div className="text-center">
-                <p className="text-sm text-gray-600 mb-2">Case Number: {caseNumber}</p>
               </div>
 
               <Button type="submit" className="w-full" disabled={isLoading}>
@@ -365,7 +450,7 @@ export default function ForgotPasswordPage() {
               </div>
 
               <Button asChild className="w-full">
-                <Link to="/signin">Sign in to your account</Link>
+                <Link to="/login">Sign in to your account</Link>
               </Button>
             </div>
           )}

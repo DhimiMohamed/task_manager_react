@@ -171,19 +171,43 @@ export default function CreateAIProjectPage() {
   }
 
   const handleSubmitProject = async (finalProposal: ProjectProposal) => {
-    try {
-      // Here you would call your project creation API
-      console.log("Creating project:", finalProposal)
-      
-      // For now, just navigate back
-      toast.success(`${finalProposal.name} has been created successfully.`)
-      
-      navigate("/projects")
-    } catch (err: any) {
-      console.error("Error creating project:", err)
-      toast.error("Failed to create project. Please try again.")
+  try {
+    const submissionData = {
+      name: finalProposal.name,
+      description: finalProposal.description,
+      deadline: finalProposal.deadline,
+      teamId: selectedTeamId,
+      phases: finalProposal.phases.map((phase) => ({
+        name: phase.name,
+        description: phase.description,
+        tasks: phase.tasks.map((task) => ({
+          title: task.title,
+          description: task.description,
+          assignedToId: parseInt(task.assignedTo),
+          priority: task.priority,
+        })),
+      })),
+      // Keep these for future use but they'll be ignored by backend for now
+      milestones: finalProposal.milestones,
+      resourceRequirements: finalProposal.resourceRequirements,
+      riskAssessment: finalProposal.riskAssessment,
+      successMetrics: finalProposal.successMetrics,
+    };
+
+    const response = await customAxios.post('/projects/create-from-proposal/', submissionData);
+    
+    if (response.data.success) {
+      toast.success(response.data.message);
+      navigate("/projects");
+    } else {
+      throw new Error(response.data.message || 'Failed to create project');
     }
+  } catch (err: any) {
+    console.error("Error creating project:", err);
+    const errorMessage = err.response?.data?.message || err.message || "Failed to create project. Please try again.";
+    toast.error(errorMessage);
   }
+}
 
   const handleNext = () => {
     if (currentStep === 2) {

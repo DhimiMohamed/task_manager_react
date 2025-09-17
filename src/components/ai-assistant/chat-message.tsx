@@ -1,9 +1,9 @@
-"use client"
-
+// src/components/ai-assistant/chat-message.tsx
 import { format } from "date-fns"
 import { Bot, User, Volume2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import ReactMarkdown from 'react-markdown'
 
 interface ChatMessageType {
   id: string
@@ -21,15 +21,13 @@ interface ChatMessageProps {
 
 export default function ChatMessage({ message, isMobile = false }: ChatMessageProps) {
   const isUser = message.type === "user"
-
+  
   const handlePlayAudio = () => {
-    // Text-to-speech functionality
     if ("speechSynthesis" in window) {
       const speechContent = [
         message.content,
         ...(message.details || []),
       ].join(". ")
-
       const utterance = new SpeechSynthesisUtterance(speechContent)
       utterance.rate = 0.9
       utterance.pitch = 1
@@ -53,7 +51,7 @@ export default function ChatMessage({ message, isMobile = false }: ChatMessagePr
           <Bot className={cn(isMobile ? "h-5 w-5" : "h-4 w-4")} />
         )}
       </div>
-
+      
       {/* Message Content */}
       <div className={cn("flex flex-col space-y-1", isMobile ? "max-w-[85%]" : "max-w-[80%]", isUser && "items-end")}>
         <div
@@ -63,8 +61,14 @@ export default function ChatMessage({ message, isMobile = false }: ChatMessagePr
             isUser ? "bg-primary text-primary-foreground rounded-br-md" : "bg-muted rounded-bl-md",
           )}
         >
-          <p className="whitespace-pre-wrap break-words">{message.content}</p>
-          
+          {isUser ? (
+            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          ) : (
+            <div className="markdown-content">
+              <ReactMarkdown>{message.content}</ReactMarkdown>
+            </div>
+          )}
+
           {/* Display details if they exist */}
           {message.details && message.details.length > 0 && (
             <div className="mt-2 text-muted-foreground">
@@ -76,7 +80,7 @@ export default function ChatMessage({ message, isMobile = false }: ChatMessagePr
             </div>
           )}
         </div>
-
+        
         <div
           className={cn(
             "flex items-center space-x-2 text-xs text-muted-foreground px-1",

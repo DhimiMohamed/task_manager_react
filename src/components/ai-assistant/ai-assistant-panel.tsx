@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
@@ -11,9 +9,6 @@ import { cn } from "@/lib/utils"
 import ChatMessage from "./chat-message"
 import VoiceInput from "./voice-input"
 import VoiceUI from "./VoiceUI"
-import { AIAssistantApi } from "@/api/apis/aiassistant-api"
-import { AiTaskAssistantRequest } from "@/api/models/ai-task-assistant-request"
-import { AiTaskAssistant200Response } from "@/api/models/ai-task-assistant200-response"
 import customAxios from "@/lib/customAxios"
 
 interface ChatMessageType {
@@ -73,6 +68,19 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
+  // New direct API connection function
+  const callAIAssistant = async (prompt: string) => {
+    try {
+      const response = await customAxios.post('/tasks/ai/task-assistant/', {
+        prompt: prompt
+      })
+      return response.data
+    } catch (error) {
+      console.error("Error calling AI assistant API:", error)
+      throw error
+    }
+  }
+
   const handleSendMessage = async () => {
     if (!inputValue.trim() || isProcessing) return
 
@@ -84,17 +92,13 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
     }
 
     setMessages((prev) => [...prev, userMessage])
+    const currentInput = inputValue
     setInputValue("")
     setIsProcessing(true)
 
     try {
-      const aiAssistantApi = new AIAssistantApi(undefined, undefined, customAxios)
-      const request: AiTaskAssistantRequest = {
-        prompt: inputValue
-      }
-
-      const response = await aiAssistantApi.aiTaskAssistant(request)
-      handleApiResponse(response.data)
+      const response = await callAIAssistant(currentInput)
+      handleApiResponse(response)
     } catch (error) {
       console.error("Error calling AI assistant API:", error)
       setMessages((prev) => [
@@ -111,22 +115,58 @@ export default function AIAssistantPanel({ isOpen, onToggle, className }: AIAssi
     }
   }
 
-  const handleApiResponse = (response: AiTaskAssistant200Response) => {
-    if (!response?.response) return
+  const handleApiResponse = (response: any) => {
+  console.log('Full API Response:', response); // Debug log to see the structure
+  
+  if (!response) return
 
-    const assistantMessage: ChatMessageType = {
-      id: Date.now().toString(),
-      type: "assistant",
-      content: response.response.user_message || "Here's what I've done:",
-      timestamp: new Date(),
-      details: response.response.details,
-      toolResults: response.response.tool_results
+  let content = ""
+  let details: string[] = []
+  let toolResults: any[] = []
+
+  // Extract content from the response structure
+  if (typeof response === 'string') {
+    content = response
+  } else if (typeof response === 'object') {
+    // Handle the case where response has an "output" field
+    if (response.output) {
+      content = response.output
+    } else if (response.response) {
+      // Handle nested response object
+      if (typeof response.response === 'string') {
+        content = response.response
+      } else if (response.response.output) {
+        content = response.response.output
+      } else if (response.response.user_message) {
+        content = response.response.user_message
+      } else {
+        content = JSON.stringify(response.response)
+      }
+    } else if (response.user_message) {
+      content = response.user_message
+    } else if (response.message) {
+      content = response.message
+    } else {
+      content = "Here's what I've done:"
     }
-
-    setMessages((prev) => [...prev, assistantMessage])
+    
+    details = response.details || response.response?.details || []
+    toolResults = response.tool_results || response.response?.tool_results || []
   }
 
-  const handleVoiceInput = (response: AiTaskAssistant200Response) => {
+  const assistantMessage: ChatMessageType = {
+    id: Date.now().toString(),
+    type: "assistant",
+    content: content,
+    timestamp: new Date(),
+    details: details,
+    toolResults: toolResults
+  }
+
+  setMessages((prev) => [...prev, assistantMessage])
+}
+
+  const handleVoiceInput = (response: any) => {
     // Add the AI response directly to messages since voiceToText returns complete response
     handleApiResponse(response);
   }

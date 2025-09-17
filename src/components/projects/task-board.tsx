@@ -1,5 +1,4 @@
-"use client"
-
+// src\components\projects\task-board.tsx
 import type React from "react"
 import { useState } from "react"
 import { useTasks, useUpdateTask, useTaskComments, useTaskAttachments } from "@/hooks/useTasks"
@@ -117,8 +116,8 @@ export default function TaskBoard({ projectId, teamId, fullWidth = false }: Task
   const [selectedTask, setSelectedTask] = useState<any | null>(null);
 
   // Get categories for this project only
-  const { data: allCategories = [] } = useCategories();
-  const categories = allCategories.filter(cat => cat.project === Number(projectId));
+  // const { data: allCategories = [] } = useCategories();
+  // const categories = allCategories.filter(cat => cat.project === Number(projectId));
 
   const handleDragStart = (e: React.DragEvent, taskId: number) => {
     setDraggedTask(taskId)
@@ -210,7 +209,8 @@ export default function TaskBoard({ projectId, teamId, fullWidth = false }: Task
                 <TaskProjectForm
                   projectId={Number(projectId)}
                   teamId={teamId}
-                  categories={categories}
+                  // categories={categories}
+                  categories={[]}
                   onSuccess={() => setOpen(false)}
                   onCancel={() => setOpen(false)}
                 />

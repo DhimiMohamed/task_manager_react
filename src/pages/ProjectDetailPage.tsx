@@ -1,5 +1,4 @@
-"use client"
-
+// src\pages\ProjectDetailPage.tsx
 import { useNavigate, useParams } from "react-router-dom"
 import { useProjectDetails, useUpdateProject } from "../hooks/useProjects"
 import { useState } from "react"
@@ -90,7 +89,7 @@ export default function ProjectDetailPage() {
           </CardHeader>
           <CardContent>
             <div className="text-lg font-semibold">{project.team_name}</div>
-            <p className="text-xs text-muted-foreground">Created by {project.created_by_username}</p>
+            <p className="text-xs text-muted-foreground">Created by {project.created_by_email}</p>
           </CardContent>
         </Card>
 

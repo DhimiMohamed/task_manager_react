@@ -1,25 +1,46 @@
+// src\pages\NotificationsPage.tsx
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { Bell, Clock, Calendar, Settings } from "lucide-react"
+import { Bell, Clock, Calendar, Settings, Users, Check, X, Mail } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import { AccountsApi } from "@/api/apis/accounts-api"
+import { TeamsApi } from "@/api/apis/teams-api" // Assuming you have a teams API
 import { Notification, UserSettings } from "@/api/models"
 import { formatDistanceToNow, parseISO, format } from "date-fns"
 import customAxios from "@/lib/customAxios"
 
+// Define the TeamInvitation interface based on your serializer
+interface TeamInvitation {
+  id: number
+  team: number
+  team_name: string
+  email: string
+  invited_by: number
+  invited_by_email: string
+  user?: number
+  user_email?: string
+  status: 'pending' | 'accepted' | 'rejected'
+  token: string
+  created_at: string
+  updated_at: string
+}
+
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
+  const [invitations, setInvitations] = useState<TeamInvitation[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [settings, setSettings] = useState<UserSettings | null>(null)
+  const [processingInvitations, setProcessingInvitations] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     fetchNotifications()
     fetchUserSettings()
+    fetchUserInvitations()
   }, [])
 
   const fetchNotifications = async () => {
@@ -34,6 +55,15 @@ export default function NotificationsPage() {
       console.error(err)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchUserInvitations = async () => {
+    try {
+      const response = await customAxios.get('/teams/my-invitations/')
+      setInvitations(response.data.filter((inv: TeamInvitation) => inv.status === 'pending'))
+    } catch (err) {
+      console.error("Failed to fetch invitations", err)
     }
   }
 
@@ -53,7 +83,6 @@ export default function NotificationsPage() {
       await api.accountsNotificationsMarkAsReadUpdate(id.toString(), {
         is_read: true
       })
-      // Update local state to reflect the change
       setNotifications(notifications.map(notification => 
         notification.id === id ? { ...notification, is_read: true } : notification
       ))
@@ -66,13 +95,36 @@ export default function NotificationsPage() {
     try {
       const api = new AccountsApi(undefined, undefined, customAxios)
       await api.accountsNotificationsMarkAllAsReadCreate()
-      // Update all notifications to read
       setNotifications(notifications.map(notification => ({
         ...notification,
         is_read: true
       })))
     } catch (err) {
       console.error("Failed to mark all notifications as read", err)
+    }
+  }
+
+  const handleInvitationResponse = async (invitationId: number, status: 'accepted' | 'rejected') => {
+    setProcessingInvitations(prev => new Set(prev).add(invitationId))
+    
+    try {
+      await customAxios.patch(`/teams/my-invitations/${invitationId}/`, { status })
+      
+      // Remove the invitation from the list since it's no longer pending
+      setInvitations(prev => prev.filter(inv => inv.id !== invitationId))
+      
+      // Show success message (you might want to use a toast notification here)
+      console.log(`Invitation ${status} successfully`)
+      
+    } catch (err) {
+      console.error(`Failed to ${status} invitation`, err)
+      // You might want to show an error toast here
+    } finally {
+      setProcessingInvitations(prev => {
+        const newSet = new Set(prev)
+        newSet.delete(invitationId)
+        return newSet
+      })
     }
   }
 
@@ -109,12 +161,21 @@ export default function NotificationsPage() {
     return <div>{error}</div>
   }
 
+  const totalNotifications = notifications.filter(n => !n.is_read).length + invitations.length
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Notifications</h1>
-          <p className="text-muted-foreground">Stay updated with task reminders and alerts</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Notifications
+            {totalNotifications > 0 && (
+              <Badge variant="destructive" className="ml-2">
+                {totalNotifications}
+              </Badge>
+            )}
+          </h1>
+          <p className="text-muted-foreground">Stay updated with task reminders, alerts, and team invitations</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={markAllAsRead}>
@@ -134,14 +195,71 @@ export default function NotificationsPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {notifications.length === 0 ? (
+              {/* Team Invitations */}
+              {invitations.map((invitation) => (
+                <div
+                  key={`invitation-${invitation.id}`}
+                  className="p-4 rounded-lg border bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 transition-colors"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900">
+                        <Users className="h-4 w-4 text-amber-600 dark:text-amber-300" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-medium">Team Invitation</h4>
+                          <Badge variant="secondary" className="bg-amber-500 hover:bg-amber-600 text-white">
+                            Invitation
+                          </Badge>
+                        </div>
+                        <p className="text-sm text-gray-700 dark:text-gray-300 mt-1">
+                          You've been invited to join <strong>{invitation.team_name}</strong> by {invitation.invited_by_email}
+                        </p>
+                        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-2">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {formatNotificationTime(invitation.created_at)}
+                          <span className="mx-1">•</span>
+                          <Mail className="h-3 w-3 mr-1" />
+                          {invitation.email}
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => handleInvitationResponse(invitation.id, 'accepted')}
+                            disabled={processingInvitations.has(invitation.id)}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <Check className="h-3 w-3 mr-1" />
+                            Accept
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleInvitationResponse(invitation.id, 'rejected')}
+                            disabled={processingInvitations.has(invitation.id)}
+                            className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
+                          >
+                            <X className="h-3 w-3 mr-1" />
+                            Decline
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {/* Regular Notifications */}
+              {notifications.length === 0 && invitations.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   No notifications available
                 </div>
               ) : (
                 notifications.map((notification) => (
                   <div
-                    key={notification.id}
+                    key={`notification-${notification.id}`}
                     className={cn(
                       "p-4 rounded-lg border transition-colors cursor-pointer",
                       notification.is_read

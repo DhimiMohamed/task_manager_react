@@ -20,12 +20,12 @@ import {
 import { Button } from "@/components/ui/button";
 
 const routes = [
-  {
-    label: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/dashboard",
-    color: "text-sky-500",
-  },
+  // {
+  //   label: "Dashboard",
+  //   icon: LayoutDashboard,
+  //   href: "/dashboard",
+  //   color: "text-sky-500",
+  // },
   {
     label: "Tasks",
     icon: ListTodo,
@@ -62,30 +62,30 @@ const routes = [
     href: "/categories",
     color: "text-green-600",
   },
-  {
-    label: "AI Suggestions",
-    icon: Sparkles,
-    href: "/suggestions",
-    color: "text-emerald-500",
-  },
-  {
-    label: "Statistics",
-    icon: BarChart3,
-    href: "/statistics",
-    color: "text-orange-500",
-  },
+  // {
+  //   label: "AI Suggestions",
+  //   icon: Sparkles,
+  //   href: "/suggestions",
+  //   color: "text-emerald-500",
+  // },
+  // {
+  //   label: "Statistics",
+  //   icon: BarChart3,
+  //   href: "/statistics",
+  //   color: "text-orange-500",
+  // },
   {
     label: "Notifications",
     icon: Bell,
     href: "/notifications",
     color: "text-blue-500",
   },
-  {
-    label: "Settings",
-    icon: Settings,
-    href: "/settings",
-    color: "text-gray-500",
-  },
+  // {
+  //   label: "Settings",
+  //   icon: Settings,
+  //   href: "/settings",
+  //   color: "text-gray-500",
+  // },
 ];
 
 export default function Sidebar() {
@@ -145,7 +145,8 @@ export default function Sidebar() {
             className={cn("flex items-center pl-3 mb-8", !isOpen && !isMobile ? "justify-center pl-0" : "")}
           >
             {isOpen || isMobile ? (
-              <h1 className="text-2xl font-bold">TaskMaster</h1>
+              // <h1 className="text-2xl font-bold">TaskMaster</h1>
+              <h1 className="text-2xl font-bold">Plan Genie AI</h1>
             ) : (
               <h1 className="text-2xl font-bold">TM</h1>
             )}

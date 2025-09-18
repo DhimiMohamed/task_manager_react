@@ -1,4 +1,4 @@
-// src\pages\ProjectDetailPage.tsx
+// src/pages/ProjectDetailPage.tsx
 import { useNavigate, useParams } from "react-router-dom"
 import { useProjectDetails, useUpdateProject } from "../hooks/useProjects"
 import { useState } from "react"
@@ -28,18 +28,12 @@ import { useStatistics } from "@/hooks/useStatistics"
 
 // Use backend Project type
 
-
 export interface ProjectFilters {
   team: string
   status: string
   timeframe: string
   search: string
 }
-
-// Remove sampleProject, use real data
-
-
-
 
 export default function ProjectDetailPage() {
   const navigate = useNavigate();
@@ -64,6 +58,8 @@ export default function ProjectDetailPage() {
 
   if (isLoading) return <div>Loading...</div>;
   if (error || !project) return <div>Project not found</div>;
+
+  const projectIdStr = project.id?.toString() ?? ""
 
   return (
     <div className="space-y-6">
@@ -133,7 +129,7 @@ export default function ProjectDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Progress Card (new) */}
+        {/* Progress Card */}
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium">Progress</CardTitle>
@@ -177,52 +173,52 @@ export default function ProjectDetailPage() {
         <TabsContent value="overview" className="mt-6">
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Project Overview</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Description</h4>
-                  <p className="text-muted-foreground">{project.description}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="font-medium mb-1">Created</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {project.created_at ? format(parseISO(project.created_at), "MMM d, yyyy") : "-"}
-                    </p>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Project Overview</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <h4 className="font-medium mb-2">Description</h4>
+                      <p className="text-muted-foreground">{project.description}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <h4 className="font-medium mb-1">Created</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {project.created_at ? format(parseISO(project.created_at), "MMM d, yyyy") : "-"}
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-medium mb-1">Due Date</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {project.end_date ? format(parseISO(project.end_date), "MMM d, yyyy") : "-"}
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium mb-1">Due Date</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {project.end_date ? format(parseISO(project.end_date), "MMM d, yyyy") : "-"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <TaskBoard projectId={project.id?.toString() ?? ""} teamId={project.team} />
+                </CardContent>
+              </Card>
+              <TaskBoard projectId={projectIdStr} teamId={project.team} />
             </div>
             <div className="space-y-6">
-              <MembersSection teamId={project.team} teamColor="red" projectId={project.id?.toString() ?? ""} teamName={project.team_name} />
-              <ActivityLog projectId="1" />
+              <MembersSection teamId={project.team} teamColor="red" projectId={projectIdStr} teamName={project.team_name} />
+              <ActivityLog projectId={projectIdStr} />
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="tasks" className="mt-6">
-          <TaskBoard projectId={project.id?.toString() ?? ""} teamId={project.team} fullWidth />
+          <TaskBoard projectId={projectIdStr} teamId={project.team} fullWidth />
         </TabsContent>
 
         <TabsContent value="timeline" className="mt-6">
-          <ProjectTimeline projectId="1" />
+          <ProjectTimeline projectId={projectIdStr} />
         </TabsContent>
 
         <TabsContent value="activity" className="mt-6">
-          <ActivityLog projectId={project.id?.toString() ?? ""} fullWidth />
+          <ActivityLog projectId={projectIdStr} fullWidth />
         </TabsContent>
       </Tabs>
     </div>

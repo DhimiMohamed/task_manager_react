@@ -81,18 +81,61 @@ export function useTasksByStatus(status: TaskStatusEnum) {
 }
 
 // ==================== COMMENT HOOKS ====================
+// **************************************************************************begin
+// Types based on your backend models
+export interface Comment1 {
+  id: number;
+  task: number;
+  author: string; // email from backend
+  text: string;
+  created_at: string;
+  updated_at: string;
+}
+
+// API function to fetch comments
+const fetchTaskComments = async (taskId: string): Promise<Comment1[]> => {
+  const response = await customAxios.get(`/tasks/${taskId}/comments/`);
+  return response.data;
+};
+
+// API function to create a comment
+const createTaskComment = async (taskId: string, commentData: { text: string }): Promise<Comment> => {
+  const response = await customAxios.post(`/tasks/${taskId}/comments/`, commentData);
+  return response.data;
+};
+
+// ==================== COMMENT HOOKS ====================
 
 export function useTaskComments(taskId: string) {
-  return useQuery<Comment[]>({
+  return useQuery<Comment1[]>({
     queryKey: ['tasks', taskId, 'comments'],
     queryFn: async () => {
-      const response = await tasksApi.tasksCommentsList(taskId);
-      return response.data;
+      console.log('Fetching comments for task:', taskId);
+      const comments = await fetchTaskComments(taskId);
+      console.log('Comments fetched:', comments);
+      return comments;
     },
     enabled: !!taskId,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 }
+
+// *********************************************************fin
+
+
+// export function useTaskComments(taskId: string) {
+//   return useQuery<Comment[]>({
+//     queryKey: ['tasks', taskId, 'comments'],
+//     queryFn: async () => {
+//       console.log('Fetching comments for task:', taskId); // Added console log
+//       const response = await tasksApi.tasksCommentsList(taskId);
+//       console.log('Comments fetched:', response.data); // Added console log
+//       return response.data;
+//     },
+//     enabled: !!taskId,
+//     staleTime: 1000 * 60 * 2, // 2 minutes
+//   });
+// }
 
 export function useCreateComment() {
   const queryClient = useQueryClient();

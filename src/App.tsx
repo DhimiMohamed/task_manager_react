@@ -22,9 +22,14 @@ import ProfilePage from './pages/ProfilePage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'; // Add this import
+
+const queryClient = new QueryClient();
 
 function App() {
   return (
+    <QueryClientProvider client={queryClient}>
     <Router>
       <Routes>
         {/* Public routes */}
@@ -55,6 +60,8 @@ function App() {
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>
+    <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
   );
 }
 

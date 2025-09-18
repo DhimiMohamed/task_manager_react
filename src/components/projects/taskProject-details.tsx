@@ -1,3 +1,4 @@
+// src/components/projects/taskProject-details.tsx
 import React, { useState } from "react";
 import { DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +18,7 @@ interface TaskProjectDetailsProps {
 
 const TaskProjectDetails: React.FC<TaskProjectDetailsProps> = ({ task, getInitials, getAssigneeEmail, getPriorityProps }) => {
   if (!task) return null;
+  
   return (
     <>
       <DialogHeader>
@@ -67,20 +69,99 @@ const TaskProjectDetails: React.FC<TaskProjectDetailsProps> = ({ task, getInitia
           </div>
         </TabsContent>
         <TabsContent value="comments" className="mt-4">
-          <CommentsSection 
-            taskId={task.id} 
-            getInitials={getInitials}
-            getAssigneeEmail={getAssigneeEmail}
-          />
+          <CommentsSection taskId={task.id} />
         </TabsContent>
-        {/* AttachmentsSection must be declared before use to avoid hoisting issues */}
         <TabsContent value="attachments" className="mt-4">
-          {/** @ts-ignore-next-line: AttachmentsSection is declared below, so move it above TaskProjectDetails if needed */}
           <AttachmentsSection taskId={task.id} getInitials={getInitials} />
         </TabsContent>
       </Tabs>
     </>
   );
+};
+
+// --- Comments Section ---
+interface CommentsSectionProps {
+  taskId: number;
+}
+
+const CommentsSection: React.FC<CommentsSectionProps> = ({ taskId }) => {
+  const { data: comments = [], isLoading } = useTaskComments(String(taskId));
+  const createComment = useCreateComment();
+  const [commentText, setCommentText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleAddComment = async () => {
+    if (!commentText.trim()) return;
+    setSubmitting(true);
+    try {
+      await createComment.mutateAsync({
+        taskId: String(taskId),
+        comment: { text: commentText },
+      });
+      setCommentText("");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // Helper function to get initials from email
+  const getInitialsFromEmail = (email: string) => {
+    if (!email) return "?";
+    const parts = email.split("@")[0].split(".");
+    return parts
+      .map(part => part[0]?.toUpperCase() || "")
+      .join("")
+      .substring(0, 2) || "?";
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h4 className="font-medium">Comments</h4>
+      </div>
+      <div className="space-y-2 max-h-60 overflow-y-auto">
+        {isLoading ? (
+          <div>Loading comments...</div>
+        ) : comments.length === 0 ? (
+          <div className="text-muted-foreground text-sm">No comments yet.</div>
+        ) : (
+          comments.map((comment) => (
+            <div key={comment.id} className="border rounded p-2 bg-muted">
+              <div className="flex items-center gap-2 mb-1">
+                <Avatar className="h-5 w-5">
+                  <AvatarImage src={"/placeholder.svg"} />
+                  <AvatarFallback className="text-xs">
+                    {getInitialsFromEmail(comment.author)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-xs font-medium">{comment.author}</span>
+                <span className="text-xs text-muted-foreground ml-2">
+                  {comment.created_at ? format(parseISO(comment.created_at), "MMM d, yyyy h:mm a") : ""}
+                </span>
+              </div>
+              <div className="text-sm">{comment.text}</div>
+            </div>
+          ))
+        )}
+      </div>
+      <div className="flex gap-2 mt-2">
+        <input
+          type="text"
+          className="flex-1 border rounded px-2 py-1 text-sm"
+          placeholder="Add a comment..."
+          value={commentText}
+          onChange={e => setCommentText(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") handleAddComment(); }}
+          disabled={submitting}
+        />
+        <Button size="sm" variant="outline" onClick={handleAddComment} disabled={submitting || !commentText.trim()}>
+          {submitting ? "Adding..." : "Add"}
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 // --- Attachments Section ---
 interface AttachmentsSectionProps {
   taskId: number;
@@ -178,78 +259,5 @@ function AttachmentsSection({ taskId, getInitials }: AttachmentsSectionProps) {
     </div>
   );
 }
-};
-
-
-// --- Comments Section ---
-interface CommentsSectionProps {
-  taskId: number;
-  getInitials: (userId: number | null | undefined) => string;
-  getAssigneeEmail: (userId: number | null | undefined) => string;
-}
-
-const CommentsSection: React.FC<CommentsSectionProps> = ({ taskId, getInitials, getAssigneeEmail }) => {
-  const { data: comments = [], isLoading } = useTaskComments(String(taskId));
-  const createComment = useCreateComment();
-  const [commentText, setCommentText] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleAddComment = async () => {
-    if (!commentText.trim()) return;
-    setSubmitting(true);
-    try {
-      await createComment.mutateAsync({
-        taskId: String(taskId),
-        comment: { text: commentText },
-      });
-      setCommentText("");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h4 className="font-medium">Comments</h4>
-      </div>
-      <div className="space-y-2 max-h-60 overflow-y-auto">
-        {isLoading ? (
-          <div>Loading comments...</div>
-        ) : comments.length === 0 ? (
-          <div className="text-muted-foreground text-sm">No comments yet.</div>
-        ) : (
-          comments.map((comment) => (
-            <div key={comment.id} className="border rounded p-2 bg-muted">
-              <div className="flex items-center gap-2 mb-1">
-                <Avatar className="h-5 w-5">
-                  <AvatarImage src={"/placeholder.svg"} />
-                  <AvatarFallback className="text-xs">{getInitials(comment.author)}</AvatarFallback>
-                </Avatar>
-                <span className="text-xs font-medium">{getAssigneeEmail(comment.author)}</span>
-                <span className="text-xs text-muted-foreground ml-2">{comment.created_at ? format(parseISO(comment.created_at), "MMM d, yyyy h:mm a") : ""}</span>
-              </div>
-              <div className="text-sm">{comment.text}</div>
-            </div>
-          ))
-        )}
-      </div>
-      <div className="flex gap-2 mt-2">
-        <input
-          type="text"
-          className="flex-1 border rounded px-2 py-1 text-sm"
-          placeholder="Add a comment..."
-          value={commentText}
-          onChange={e => setCommentText(e.target.value)}
-          onKeyDown={e => { if (e.key === "Enter") handleAddComment(); }}
-          disabled={submitting}
-        />
-        <Button size="sm" variant="outline" onClick={handleAddComment} disabled={submitting || !commentText.trim()}>
-          {submitting ? "Adding..." : "Add"}
-        </Button>
-      </div>
-    </div>
-  );
-};
 
 export default TaskProjectDetails;

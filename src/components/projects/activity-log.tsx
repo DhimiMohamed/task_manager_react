@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { ArrowRight, Plus, MessageSquare, Upload, UserPlus, Settings, CheckCircle2, Clock, Trash2, Edit, RefreshCw, RotateCcw, Calendar } from "lucide-react"
+import { ArrowRight, Plus, MessageSquare, Upload, UserPlus, Settings, CheckCircle2, Clock, Trash2, Edit, RefreshCw, Calendar } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format, parseISO } from "date-fns"
 import { useActivityLogs } from "@/hooks/useActivityLogs"
@@ -296,14 +296,14 @@ export default function ActivityLog({ projectId, fullWidth = false }: ActivityLo
                     </div>
 
                     {/* Debug info for development - remove in production */}
-                    {process.env.NODE_ENV === 'development' && activity.action === ActivityLogActionEnum.Comment && (
+                    {/* {process.env.NODE_ENV === 'development' && activity.action === ActivityLogActionEnum.Comment && (
                       <details className="mt-2 text-xs text-muted-foreground">
                         <summary className="cursor-pointer">Debug Info</summary>
                         <pre className="mt-1 p-2 bg-muted rounded text-xs overflow-x-auto">
                           {JSON.stringify(activity, null, 2)}
                         </pre>
                       </details>
-                    )}
+                    )} */}
                   </div>
                 </div>
               )

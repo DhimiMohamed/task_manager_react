@@ -3,13 +3,13 @@ import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   Calendar,
-  LayoutDashboard,
+  // LayoutDashboard,
   ListTodo,
-  BarChart3,
-  Settings,
+  // BarChart3,
+  // Settings,
   Bell,
   PlusCircle,
-  Sparkles,
+  // Sparkles,
   Menu,
   X,
   Tag,
@@ -146,7 +146,7 @@ export default function Sidebar() {
           >
             {isOpen || isMobile ? (
               // <h1 className="text-2xl font-bold">TaskMaster</h1>
-              <h1 className="text-2xl font-bold">Plan Genie AI</h1>
+              <h1 className="text-2xl font-bold">TaskMind</h1>
             ) : (
               <h1 className="text-2xl font-bold">TM</h1>
             )}

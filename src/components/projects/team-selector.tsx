@@ -50,6 +50,9 @@ export default function TeamSelector({ selectedTeam, onTeamChange, isGenerating 
   const { data: teams = [], isLoading: teamsLoading, error: teamsError } = useTeams()
   const { data: teamMembers = [], isLoading: membersLoading, error: membersError } = useTeamMembers(selectedTeamId ? parseInt(selectedTeamId) : 0)
 
+  // Filter teams to show only those where the user is admin
+  const adminTeams = teams?.filter((team) => Boolean(team.is_admin)) || [];
+
   const filteredMembers = teamMembers
     .map(transformTeamMembership)
     .filter(
@@ -126,7 +129,7 @@ export default function TeamSelector({ selectedTeam, onTeamChange, isGenerating 
           <CardDescription>Choose a team to select members from</CardDescription>
         </CardHeader>
         <CardContent>
-          {teams.length === 0 ? (
+          {adminTeams.length === 0 ? (
             <div className="text-center py-8">
               <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-medium mb-2">No teams available</h3>
@@ -140,7 +143,7 @@ export default function TeamSelector({ selectedTeam, onTeamChange, isGenerating 
                 <SelectValue placeholder="Select a team..." />
               </SelectTrigger>
               <SelectContent>
-                {teams.map((team) => (
+                {adminTeams.map((team) => (
                   <SelectItem key={team.id} value={team.id?.toString() || ''}>
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4" />

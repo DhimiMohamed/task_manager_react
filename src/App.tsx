@@ -29,7 +29,7 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
+    // <QueryClientProvider client={queryClient}>
     <Router>
       <Routes>
         {/* Public routes */}
@@ -60,8 +60,8 @@ function App() {
         <Route path="*" element={<div>404 Not Found</div>} />
       </Routes>
     </Router>
-    <ReactQueryDevtools initialIsOpen={false} />
-    </QueryClientProvider>
+    // <ReactQueryDevtools initialIsOpen={false} />
+    // </QueryClientProvider>
   );
 }
 
@@ -74,8 +74,9 @@ function LayoutWithSidebar() {
       {/* <main className="flex-1 p-2 md:p-6 pt-16 md:pt-6"> */}
         <Routes>
           {/* These will render in the main content area */}
-          <Route index element={<Dashboard />} />
-          <Route path="dashboard" element={<Dashboard />} />
+          {/* <Route index element={<Dashboard />} /> */}
+          <Route index element={<CalendarPage />} />
+          {/* <Route path="dashboard" element={<Dashboard />} /> */}
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="projects" element={<ProjectsPage />} />
           <Route path="projects/:id" element={<ProjectDetailPage />} />

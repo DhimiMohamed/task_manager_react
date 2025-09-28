@@ -16,11 +16,6 @@ import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-
-
-
-
-
 interface ProjectFormProps {
   onSuccess?: () => void;
 }
@@ -37,6 +32,9 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
 
   const createProject = useCreateProject();
   const [submitting, setSubmitting] = useState(false);
+
+  // Filter teams to show only those where the user is admin
+  const adminTeams = teams?.filter((team) => Boolean(team.is_admin)) || [];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,10 +55,6 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
       setSubmitting(false);
     }
   }
-
-  // Remove members logic for now (not in backend model)
-
-//   const selectedTeam = teams.find((team) => team.id === formData.team)
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -97,13 +91,14 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
           ) : (
             <Select value={formData.team} onValueChange={(value) => setFormData({ ...formData, team: value })}>
               <SelectTrigger>
-                <SelectValue placeholder="Select team" />
+                <SelectValue placeholder="Select team (admin only)" />
               </SelectTrigger>
               <SelectContent>
-                {teams && teams.length > 0 ? (
-                  teams.map((team) => (
+                {adminTeams && adminTeams.length > 0 ? (
+                  adminTeams.map((team) => (
                     <SelectItem key={team.id} value={String(team.id)}>
                       <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 rounded-full" style={{backgroundColor: team?.color}}></div>
                         {/* Optionally add a color indicator if your team model has a color property */}
                         {/* <div className={cn("w-3 h-3 rounded-full", team.color)}></div> */}
                         {team.name}
@@ -111,7 +106,9 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
                     </SelectItem>
                   ))
                 ) : (
-                  <div className="px-2 py-1 text-muted-foreground text-sm">No teams found</div>
+                  <div className="px-2 py-1 text-muted-foreground text-sm">
+                    No teams where you are admin
+                  </div>
                 )}
               </SelectContent>
             </Select>
@@ -149,7 +146,7 @@ export default function ProjectForm({ onSuccess }: ProjectFormProps) {
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
-        <Button type="submit" disabled={submitting}>
+        <Button type="submit" disabled={submitting || adminTeams.length === 0}>
           {submitting ? "Creating..." : "Create Project"}
         </Button>
       </div>

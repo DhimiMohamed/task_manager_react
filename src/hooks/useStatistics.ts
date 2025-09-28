@@ -1,3 +1,4 @@
+// src\hooks\useStatistics.ts
 
 import { useQuery } from '@tanstack/react-query';
 import { TasksApi } from '../api/apis/tasks-api';

@@ -390,6 +390,11 @@ function TaskItem({
               {task.title}
             </p>
             <div className="flex flex-wrap gap-2">
+              {task.project_name && (
+                <Badge variant="outline" className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                  {task.project_name}
+                </Badge>
+              )}
               {category && (
                 <Badge variant="outline" style={{ backgroundColor: category.color || undefined }}>
                   {category.name}

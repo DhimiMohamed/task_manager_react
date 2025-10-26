@@ -6,12 +6,13 @@ import { useTeamMembers } from "@/hooks/useTeams"
 // TaskCard component to avoid calling hooks in a loop
 import { Eye } from "lucide-react"
 
-function TaskCard({ task, onDragStart, getInitials, getPriorityProps, onView }: {
+function TaskCard({ task, onDragStart, getInitials, getPriorityProps, onView, getAssigneeEmail }: {
   task: any;
   onDragStart: (e: React.DragEvent, taskId: number) => void;
   getInitials: (userId: number | null | undefined) => string;
   getPriorityProps: (priority: number | undefined) => { label: string; color: string };
   onView: (task: any) => void;
+  getAssigneeEmail: (userId: number | null | undefined) => string;
 }) {
   const { data: comments = [] } = useTaskComments(String(task.id));
   const { data: attachments = [] } = useTaskAttachments(String(task.id));
@@ -49,10 +50,15 @@ function TaskCard({ task, onDragStart, getInitials, getPriorityProps, onView }: 
           </div>
 
           <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
             <Avatar className="h-6 w-6">
               <AvatarImage src="/placeholder.svg" />
               <AvatarFallback className="text-xs">{getInitials(task.assigned_to)}</AvatarFallback>
             </Avatar>
+            <span className="text-xs text-muted-foreground truncate max-w-[130px]">
+      {getAssigneeEmail(task.assigned_to)}
+    </span>
+    </div>
 
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               {comments.length > 0 && (
@@ -244,6 +250,7 @@ export default function TaskBoard({ projectId, teamId, fullWidth = false }: Task
                     getInitials={getInitials}
                     getPriorityProps={getPriorityProps}
                     onView={setSelectedTask}
+                    getAssigneeEmail={getAssigneeEmail}
                   />
                 ))}
               </div>

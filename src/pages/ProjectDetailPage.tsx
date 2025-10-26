@@ -163,10 +163,10 @@ export default function ProjectDetailPage() {
 
       {/* Main Content Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="tasks">Tasks</TabsTrigger>
-          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          {/* <TabsTrigger value="timeline">Timeline</TabsTrigger> */}
           <TabsTrigger value="activity">Activity</TabsTrigger>
         </TabsList>
 
@@ -213,9 +213,9 @@ export default function ProjectDetailPage() {
           <TaskBoard projectId={projectIdStr} teamId={project.team} fullWidth />
         </TabsContent>
 
-        <TabsContent value="timeline" className="mt-6">
+        {/* <TabsContent value="timeline" className="mt-6">
           <ProjectTimeline projectId={projectIdStr} />
-        </TabsContent>
+        </TabsContent> */}
 
         <TabsContent value="activity" className="mt-6">
           <ActivityLog projectId={projectIdStr} fullWidth />

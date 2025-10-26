@@ -1,3 +1,4 @@
+// src\pages\ProfilePage.tsx
 import React, { useEffect, useState } from "react";
 import ProfileView from "@/components/profile/profile-view";
 import { AccountsApi } from "@/api/apis/accounts-api";

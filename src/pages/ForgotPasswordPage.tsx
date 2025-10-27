@@ -24,7 +24,6 @@ const accountsApi = new AccountsApi()
 export default function ForgotPasswordPage() {
   const [currentStep, setCurrentStep] = useState<Step>("email")
   const [email, setEmail] = useState("")
-  const [caseNumber, setCaseNumber] = useState("")
   const [verificationCode, setVerificationCode] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -35,9 +34,6 @@ export default function ForgotPasswordPage() {
     feedback: [],
   })
 
-  const generateCaseNumber = () => {
-    return `CASE-${Math.random().toString(36).substr(2, 9).toUpperCase()}`
-  }
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -67,9 +63,7 @@ export default function ForgotPasswordPage() {
       // Call the API
       await accountsApi.accountsPasswordResetRequestCreate(requestData)
 
-      // Generate case number for user reference
-      const newCaseNumber = generateCaseNumber()
-      setCaseNumber(newCaseNumber)
+
       
       // Clear errors and proceed to next step
       setErrors({})
@@ -309,6 +303,7 @@ export default function ForgotPasswordPage() {
                   <Mail className="h-4 w-4" />
                   <AlertDescription>
                     We've sent a 6-digit verification code to <strong>{email}</strong>
+
                   </AlertDescription>
                 </Alert>
               </div>

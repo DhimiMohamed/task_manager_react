@@ -80,7 +80,7 @@ function TaskCard({ task, onDragStart, getInitials, getPriorityProps, onView, ge
     </Card>
   );
 }
-import { useCategories } from "@/hooks/useCategories"
+// import { useCategories } from "@/hooks/useCategories"
 import TaskProjectForm from "./taskProject-form"
 import TaskProjectDetails from "./taskProject-details"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"

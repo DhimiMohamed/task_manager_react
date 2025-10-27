@@ -5,10 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "vercel-build": "npm install --legacy-peer-deps && vite build --mode production"
+    "vercel-build": "npm install --legacy-peer-deps && vite build"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.13",

@@ -99,10 +99,10 @@ const fetchTaskComments = async (taskId: string): Promise<Comment1[]> => {
 };
 
 // API function to create a comment
-const createTaskComment = async (taskId: string, commentData: { text: string }): Promise<Comment> => {
-  const response = await customAxios.post(`/tasks/${taskId}/comments/`, commentData);
-  return response.data;
-};
+// const createTaskComment = async (taskId: string, commentData: { text: string }): Promise<Comment> => {
+//   const response = await customAxios.post(`/tasks/${taskId}/comments/`, commentData);
+//   return response.data;
+// };
 
 // ==================== COMMENT HOOKS ====================
 

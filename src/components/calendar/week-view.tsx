@@ -245,7 +245,7 @@ export default function WeekView({
             const style = getTaskStyle(task);
             if (!style) return null;
 
-            const backgroundColor = getCategoryColor(task.category);
+            const backgroundColor = getCategoryColor(task.category ?? null);
             const dayWidth = 100 / 7;
             const minuteHeight = 100 / 1440;
             const showDelete = hoveredTaskId === task.id;

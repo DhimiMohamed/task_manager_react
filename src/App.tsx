@@ -3,7 +3,7 @@ import RegistrationForm from './components/RegistrationForm';
 import VerifyEmailPage from './components/VerifyEmailPage';
 import EmailVerifiedSuccess from './components/EmailVerifiedSuccess';
 // import LoginForm from './components/LoginForm';
-import Dashboard from './pages/Dashboard';
+// import Dashboard from './pages/Dashboard';
 // import Tasks from './components/Test';
 import ProtectedRoute from './routes/ProtectedRoute';
 import Sidebar from './components/sidebar';
@@ -22,10 +22,10 @@ import ProfilePage from './pages/ProfilePage';
 import SignupPage from './pages/SignupPage';
 import LoginPage from './pages/LoginPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools'; // Add this import
+// import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools'; // Add this import
 
-const queryClient = new QueryClient();
+// const queryClient = new QueryClient();
 
 function App() {
   return (

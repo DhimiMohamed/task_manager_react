@@ -8,7 +8,7 @@ import { Bell, Clock, Calendar, Settings, Users, Check, X, Mail } from "lucide-r
 import { cn } from "@/lib/utils"
 import { useEffect, useState } from "react"
 import { AccountsApi } from "@/api/apis/accounts-api"
-import { TeamsApi } from "@/api/apis/teams-api" // Assuming you have a teams API
+// import { TeamsApi } from "@/api/apis/teams-api" // Assuming you have a teams API
 import { Notification, UserSettings } from "@/api/models"
 import { formatDistanceToNow, parseISO, format } from "date-fns"
 import customAxios from "@/lib/customAxios"

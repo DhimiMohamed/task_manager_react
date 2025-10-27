@@ -213,9 +213,9 @@ export default function ProjectDetailPage() {
           <TaskBoard projectId={projectIdStr} teamId={project.team} fullWidth />
         </TabsContent>
 
-        {/* <TabsContent value="timeline" className="mt-6">
+        <TabsContent value="timeline" className="mt-6">
           <ProjectTimeline projectId={projectIdStr} />
-        </TabsContent> */}
+        </TabsContent>
 
         <TabsContent value="activity" className="mt-6">
           <ActivityLog projectId={projectIdStr} fullWidth />

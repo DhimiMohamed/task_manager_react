@@ -1,7 +1,7 @@
 // src/hooks/useActivityLogs.ts
 import { useQuery } from '@tanstack/react-query'
 import { ActivityApi } from '@/api/apis/activity-api'
-import { ActivityLog } from '@/api/models/activity-log'
+// import { ActivityLog } from '@/api/models/activity-log'
 import customAxios from '@/lib/customAxios'
 
 const activityApi = new ActivityApi(undefined, undefined, customAxios)
